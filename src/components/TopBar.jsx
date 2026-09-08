@@ -1,8 +1,8 @@
 import React from 'react';
-import { Menu, Calendar, ShieldCheck, UserCheck, ArrowLeftRight } from 'lucide-react';
+import { Menu, Calendar, ShieldCheck, UserCheck } from 'lucide-react';
 import { AccessibilityWidget } from './AccessibilityWidget';
 
-export function TopBar({ currentUser, activeTab, onSwitchRole, onToggleMobileMenu }) {
+export function TopBar({ currentUser, activeTab, onToggleMobileMenu }) {
   const isAdmin = currentUser?.role === 'admin';
 
   const tabTitles = {
@@ -42,23 +42,11 @@ export function TopBar({ currentUser, activeTab, onSwitchRole, onToggleMobileMen
         <AccessibilityWidget inline={true} tone="light" />
 
         {/* Today Date Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/80 text-slate-600 text-xs font-medium">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/80 text-slate-600 text-xs font-medium">
           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-          <span>Senin, 7 September 2026</span>
+          <span className="hidden sm:inline">Senin, 7 September 2026</span>
+          <span className="sm:hidden">7 Sep 2026</span>
         </div>
-
-        {/* Demo Switcher Quick Pill */}
-        <button
-          onClick={onSwitchRole}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[#1B365D]/90 hover:bg-[#1B365D] text-white text-xs font-medium cursor-pointer"
-          title="Klik untuk beralih mode admin / karyawan"
-        >
-          <ArrowLeftRight className="w-3.5 h-3.5 text-sky-200" />
-          <span className="hidden sm:inline">Mode:</span>
-          <span className="text-sky-100 font-semibold">
-            {isAdmin ? 'Admin' : 'Karyawan'}
-          </span>
-        </button>
       </div>
     </header>
   );

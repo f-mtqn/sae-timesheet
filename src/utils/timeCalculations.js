@@ -85,3 +85,31 @@ export function calculateTimesheetMetrics(checkIn, checkOut, settings) {
     status,
   };
 }
+
+// Mengambil tanggal hari ini dalam format YYYY-MM-DD sesuai zona Waktu Indonesia Barat (WIB, UTC+7)
+export function getTodayWIB() {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return formatter.format(new Date());
+}
+
+// Format tanggal ke Bahasa Indonesia lengkap (misal: "Selasa, 08 September 2026")
+export function formatDateIndoWIB(dateStr) {
+  if (!dateStr) return '';
+  try {
+    const dateObj = new Date(`${dateStr}T12:00:00+07:00`);
+    return new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(dateObj);
+  } catch (e) {
+    return dateStr;
+  }
+}

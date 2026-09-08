@@ -7,7 +7,6 @@ import {
   FileSpreadsheet, 
   Users, 
   Settings, 
-  ArrowLeftRight, 
   LogOut, 
   ShieldCheck, 
   UserCheck,
@@ -18,7 +17,6 @@ export function Sidebar({
   currentUser, 
   activeTab, 
   setActiveTab, 
-  onSwitchRole, 
   onLogout,
   mobileOpen,
   setMobileOpen
@@ -196,27 +194,15 @@ export function Sidebar({
           })}
         </div>
 
-        {/* Bottom Actions: Demo Switcher & Logout */}
-        <div className="p-3 border-t border-white/8 space-y-2 bg-black/15">
-          {/* Demo Role Switcher Button */}
-          <button
-            onClick={onSwitchRole}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/8 hover:bg-white/12 text-sky-100 hover:text-white text-xs font-medium border border-white/10 cursor-pointer"
-            title="Ganti peran antara Admin dan Karyawan untuk demo"
-          >
-            <ArrowLeftRight className="w-3.5 h-3.5 text-sky-300 shrink-0" />
-            <span className="truncate">
-              Beralih ke {isAdmin ? 'Tampilan Karyawan' : 'Tampilan Admin'}
-            </span>
-          </button>
-
+        {/* Bottom Actions: Logout */}
+        <div className="p-3 border-t border-white/8 bg-black/15">
           {/* Logout */}
           <button
             onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-slate-400 hover:text-rose-200 hover:bg-rose-950/30 text-xs font-medium cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-slate-400 hover:text-rose-200 hover:bg-rose-950/30 text-xs font-semibold cursor-pointer transition border border-transparent hover:border-rose-900/40"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Keluar Akun</span>
+            <LogOut className="w-4 h-4" />
+            <span>Keluar Akun (Logout)</span>
           </button>
         </div>
       </aside>

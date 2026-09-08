@@ -13,10 +13,10 @@ import {
   Timer,
   Info
 } from 'lucide-react';
-import { calculateTimesheetMetrics } from '../utils/timeCalculations';
+import { calculateTimesheetMetrics, getTodayWIB } from '../utils/timeCalculations';
 
 export function EmployeeView({ currentUser, timesheets, onSaveTimesheet, settings }) {
-  const todayStr = "2026-09-07"; // Sesuai tanggal hari ini di metadata sistem
+  const todayStr = getTodayWIB();
   
   // State form input
   const [selectedDate, setSelectedDate] = useState(todayStr);

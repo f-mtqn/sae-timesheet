@@ -12,16 +12,35 @@ import {
   X,
   Phone,
   Mail,
-  Building
+  Building,
+  CalendarClock,
+  AlertCircle,
+  Trash2,
+  Loader2
 } from 'lucide-react';
+import { getTodayWIB, formatDateIndoWIB } from '../utils/timeCalculations';
 
-export function AdminEmployeesView({ employees, onSaveEmployee, onToggleStatus }) {
+export function AdminEmployeesView({ 
+  employees, 
+  onSaveEmployee, 
+  onToggleStatus,
+  lateEntryPermits = [],
+  onGrantPermit,
+  onRevokePermit
+}) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // Modal State
+  // Modal Karyawan State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+
+  // Modal Izin Susulan State
+  const [permitModalOpen, setPermitModalOpen] = useState(false);
+  const [selectedEmployeeForPermit, setSelectedEmployeeForPermit] = useState(null);
+  const [permitDate, setPermitDate] = useState('');
+  const [permitReason, setPermitReason] = useState('');
+  const [permitLoading, setPermitLoading] = useState(false);
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -33,7 +52,7 @@ export function AdminEmployeesView({ employees, onSaveEmployee, onToggleStatus }
     departemen: 'Engineering',
     role: 'user',
     status: 'aktif',
-    tanggalBergabung: '2026-09-07',
+    tanggalBergabung: getTodayWIB(),
   });
 
   const [toastMessage, setToastMessage] = useState('');
@@ -106,6 +125,57 @@ export function AdminEmployeesView({ employees, onSaveEmployee, onToggleStatus }
         : `Karyawan baru ${formData.namaLengkap} berhasil ditambahkan.`
     );
     setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  // Handler Buka Modal Izin Susulan
+  const handleOpenPermitModal = (emp) => {
+    setSelectedEmployeeForPermit(emp);
+    const today = getTodayWIB();
+    const d = new Date(`${today}T12:00:00+07:00`);
+    d.setDate(d.getDate() - 1);
+    const yesterdayStr = d.toISOString().slice(0, 10);
+    setPermitDate(yesterdayStr);
+    setPermitReason('');
+    setPermitModalOpen(true);
+  };
+
+  // Handler Submit Izin Susulan
+  const handleSubmitPermit = async (e) => {
+    e.preventDefault();
+    if (!selectedEmployeeForPermit || !permitDate || !permitReason.trim()) {
+      alert('Mohon pilih tanggal dan masukkan alasan izin susulan.');
+      return;
+    }
+    setPermitLoading(true);
+    try {
+      await onGrantPermit({
+        employeeId: selectedEmployeeForPermit.id,
+        employeeCode: selectedEmployeeForPermit.employeeCode || selectedEmployeeForPermit.id,
+        employeeName: selectedEmployeeForPermit.namaLengkap,
+        permittedDate: permitDate,
+        reason: permitReason.trim(),
+      });
+      setToastMessage(`Izin susulan tanggal ${permitDate} berhasil diberikan kepada ${selectedEmployeeForPermit.namaLengkap}!`);
+      setTimeout(() => setToastMessage(''), 4000);
+      setPermitModalOpen(false);
+    } catch (err) {
+      console.error('Error granting permit:', err);
+      alert('Gagal memberikan izin: ' + (err.message || 'Terjadi kesalahan'));
+    } finally {
+      setPermitLoading(false);
+    }
+  };
+
+  // Handler Cabut Izin Susulan
+  const handleRevoke = async (permitId) => {
+    if (!confirm('Apakah Anda yakin ingin mencabut izin susulan ini?')) return;
+    try {
+      await onRevokePermit(permitId);
+      setToastMessage('Izin susulan berhasil dicabut.');
+      setTimeout(() => setToastMessage(''), 3000);
+    } catch (err) {
+      console.error('Error revoking permit:', err);
+    }
   };
 
   return (
@@ -191,6 +261,7 @@ export function AdminEmployeesView({ employees, onSaveEmployee, onToggleStatus }
                 const initials = emp.namaLengkap
                   ? emp.namaLengkap.split(' ').map(n => n[0]).slice(0, 2).join('')
                   : 'EMP';
+                const pendingPermit = (lateEntryPermits || []).find(p => p.employeeId === emp.id && p.status === 'pending');
                 return (
                   <tr key={emp.id} className="hover:bg-blue-50/40 transition">
                     <td className="py-3.5 px-4 whitespace-nowrap">
@@ -200,7 +271,15 @@ export function AdminEmployeesView({ employees, onSaveEmployee, onToggleStatus }
                         </div>
                         <div>
                           <div className="font-semibold text-slate-900 leading-tight">{emp.namaLengkap}</div>
-                          <div className="text-[10px] text-slate-500 mt-0.5 font-mono">ID: {emp.id}</div>
+                          <div className="text-[10px] text-slate-500 mt-0.5 font-mono">ID: {emp.employeeCode || emp.id}</div>
+                          {pendingPermit && (
+                            <div className="mt-1">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300" title={`Alasan: ${pendingPermit.reason}`}>
+                                <CalendarClock className="w-3 h-3 text-amber-700" />
+                                <span>Izin Susulan: {pendingPermit.permittedDate}</span>
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -245,6 +324,13 @@ export function AdminEmployeesView({ employees, onSaveEmployee, onToggleStatus }
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-center whitespace-nowrap space-x-1.5">
+                      <button
+                        onClick={() => handleOpenPermitModal(emp)}
+                        className="p-2 rounded-xl hover:bg-amber-50 text-slate-500 hover:text-amber-700 transition cursor-pointer border border-transparent hover:border-amber-200"
+                        title="Beri Izin Susulan Absensi (Lewat Hari)"
+                      >
+                        <CalendarClock className="w-4 h-4" />
+                      </button>
                       <button
                         onClick={() => handleOpenEditModal(emp)}
                         className="p-2 rounded-xl hover:bg-blue-50 text-slate-500 hover:text-blue-700 transition cursor-pointer border border-transparent hover:border-blue-200"
@@ -402,6 +488,156 @@ export function AdminEmployeesView({ employees, onSaveEmployee, onToggleStatus }
                   className="px-5 py-2 font-bold text-white bg-[#1B365D] hover:bg-[#142642] rounded-xl shadow-xs transition cursor-pointer"
                 >
                   {editingEmployee ? "Simpan Perubahan" : "Tambahkan Karyawan"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL IZIN PENGISIAN SUSULAN (DISPENSASI ADMIN HR) */}
+      {permitModalOpen && selectedEmployeeForPermit && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150 space-y-5">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-amber-100 text-amber-800 border border-amber-200">
+                  <CalendarClock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Izin Pengisian Susulan Absensi
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Beri dispensasi tanggal terlewat bagi karyawan
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPermitModalOpen(false)}
+                className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Info Karyawan */}
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
+              <div>
+                <span className="text-slate-400 block font-medium">Karyawan Penerima Izin</span>
+                <span className="font-bold text-slate-800 text-sm">{selectedEmployeeForPermit.namaLengkap}</span>
+                <span className="text-slate-500 block text-[11px] font-mono">
+                  {selectedEmployeeForPermit.employeeCode || selectedEmployeeForPermit.id} • {selectedEmployeeForPermit.posisi}
+                </span>
+              </div>
+              <span className="px-2.5 py-1 rounded-full font-semibold text-[11px] bg-blue-50 text-blue-800 border border-blue-200">
+                {selectedEmployeeForPermit.departemen}
+              </span>
+            </div>
+
+            <form onSubmit={handleSubmitPermit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                  <span>Tanggal Yang Diizinkan Untuk Diisi Susulan</span>
+                  <span className="text-[11px] text-slate-400 font-medium">Pilih tanggal lampau</span>
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={permitDate}
+                  max={getTodayWIB()}
+                  onChange={(e) => setPermitDate(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50"
+                />
+                <span className="text-[11px] text-slate-500 mt-1 block">
+                  {permitDate && formatDateIndoWIB(permitDate)}
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Alasan / Keterangan Dispensasi Resmi (Wajib)
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={permitReason}
+                  onChange={(e) => setPermitReason(e.target.value)}
+                  placeholder="Contoh: Penugasan luar kota ke Balongan tanpa sinyal / dispensasi isolasi mandiri / kendala teknis sistem..."
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50 leading-relaxed"
+                />
+              </div>
+
+              {/* Riwayat Izin Karyawan Ini */}
+              {(() => {
+                const empPermits = (lateEntryPermits || []).filter(p => p.employeeId === selectedEmployeeForPermit.id);
+                if (empPermits.length === 0) return null;
+                return (
+                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                      Riwayat Izin Susulan Karyawan Ini:
+                    </span>
+                    <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                      {empPermits.map(p => (
+                        <div key={p.id} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between gap-2">
+                          <div>
+                            <div className="font-bold text-slate-800 flex items-center gap-2">
+                              <span>{p.permittedDate}</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                p.status === 'completed' 
+                                  ? 'bg-emerald-100 text-emerald-800' 
+                                  : p.status === 'revoked'
+                                  ? 'bg-slate-200 text-slate-600 line-through'
+                                  : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {p.status === 'completed' ? 'Sudah Diisi' : p.status === 'revoked' ? 'Dicabut' : 'Menunggu Pengisian'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 mt-0.5 truncate max-w-xs italic">
+                              "{p.reason}"
+                            </p>
+                          </div>
+                          {p.status === 'pending' && (
+                            <button
+                              type="button"
+                              onClick={() => handleRevoke(p.id)}
+                              className="text-[11px] font-bold text-red-600 hover:text-red-800 hover:underline cursor-pointer shrink-0"
+                            >
+                              Cabut
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setPermitModalOpen(false)}
+                  className="px-4 py-2.5 font-semibold text-xs text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={permitLoading}
+                  className="px-5 py-2.5 font-bold text-xs text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-xs transition cursor-pointer flex items-center gap-2"
+                >
+                  {permitLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Menyimpan Izin...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CalendarClock className="w-4 h-4" />
+                      <span>Keluarkan Izin Susulan</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

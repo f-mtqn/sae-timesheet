@@ -1,9 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  initialEmployees, 
-  initialTimesheets, 
-  initialSettings 
-} from './data/dummyData';
+  supabase,
+  logoutFromSupabase,
+  getEmployeesFromSupabase,
+  upsertEmployeeToSupabase,
+  toggleEmployeeStatusInSupabase,
+  getTimesheetsFromSupabase,
+  saveTimesheetToSupabase,
+  getSettingsFromSupabase,
+  saveSettingsToSupabase,
+  mapEmployeeFromDB,
+  getLateEntryPermitsFromSupabase,
+  grantLateEntryPermitInSupabase,
+  completeLateEntryPermitInSupabase,
+  revokeLateEntryPermitInSupabase
+} from './lib/supabaseClient';
+import { initialSettings } from './data/dummyData';
 import { Sidebar } from './components/Sidebar';
 import { TopBar } from './components/TopBar';
 import { AccessibilityWidget } from './components/AccessibilityWidget';
@@ -15,23 +27,70 @@ import { AdminDashboardView } from './pages/AdminDashboardView';
 import { AdminRecapView } from './pages/AdminRecapView';
 import { AdminEmployeesView } from './pages/AdminEmployeesView';
 import { AdminSettingsView } from './pages/AdminSettingsView';
+import { Loader2, RefreshCw } from 'lucide-react';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-[#132438] text-white flex flex-col items-center justify-center p-6 text-center">
+          <div className="max-w-md w-full bg-slate-800/90 rounded-3xl p-7 border border-slate-700 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl font-bold">
+              ⚠️
+            </div>
+            <h2 className="text-base font-bold text-slate-100">Terjadi Kendala Memuat Tampilan</h2>
+            <p className="text-xs text-slate-400">
+              {this.state.error?.message || "Sistem mendeteksi kesalahan sementara pada komponen antarmuka."}
+            </p>
+            <div className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  this.setState({ hasError: false, error: null });
+                  window.location.reload();
+                }}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition cursor-pointer flex items-center gap-2"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Muat Ulang Halaman</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function App() {
-  // Persistence state with localStorage
-  const [employees, setEmployees] = useState(() => {
-    const saved = localStorage.getItem('sae_timesheet_employees');
-    return saved ? JSON.parse(saved) : initialEmployees;
-  });
+  return (
+    <ErrorBoundary>
+      <MainApp />
+    </ErrorBoundary>
+  );
+}
 
-  const [timesheets, setTimesheets] = useState(() => {
-    const saved = localStorage.getItem('sae_timesheet_data');
-    return saved ? JSON.parse(saved) : initialTimesheets;
-  });
-
-  const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem('sae_timesheet_settings');
-    return saved ? JSON.parse(saved) : initialSettings;
-  });
+function MainApp() {
+  // Database state
+  const [employees, setEmployees] = useState([]);
+  const [timesheets, setTimesheets] = useState([]);
+  const [settings, setSettings] = useState(initialSettings);
+  const [lateEntryPermits, setLateEntryPermits] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Auth state: currentUser (null = login screen)
   const [currentUser, setCurrentUser] = useState(null);
@@ -42,18 +101,62 @@ export default function App() {
   // Mobile sidebar open state
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // Save changes to localStorage
-  useEffect(() => {
-    localStorage.setItem('sae_timesheet_employees', JSON.stringify(employees));
-  }, [employees]);
+  // 1. Fetch all data from Supabase
+  const loadSupabaseData = useCallback(async () => {
+    try {
+      const [empList, tsList, settingsData, permitList] = await Promise.all([
+        getEmployeesFromSupabase().catch(err => { console.error('Emp fetch err:', err); return []; }),
+        getTimesheetsFromSupabase().catch(err => { console.error('TS fetch err:', err); return []; }),
+        getSettingsFromSupabase().catch(err => { console.error('Settings fetch err:', err); return initialSettings; }),
+        getLateEntryPermitsFromSupabase().catch(err => { console.error('Permits fetch err:', err); return []; }),
+      ]);
 
-  useEffect(() => {
-    localStorage.setItem('sae_timesheet_data', JSON.stringify(timesheets));
-  }, [timesheets]);
+      setEmployees(empList);
+      setTimesheets(tsList);
+      if (settingsData) setSettings(settingsData);
+      setLateEntryPermits(permitList || []);
+    } catch (err) {
+      console.error('Error loading Supabase data:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
+  // 2. Initialize Session and Data on mount
   useEffect(() => {
-    localStorage.setItem('sae_timesheet_settings', JSON.stringify(settings));
-  }, [settings]);
+    loadSupabaseData();
+
+    // Check active Supabase auth session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const userEmail = session.user.email?.toLowerCase();
+        // Fetch profile
+        supabase
+          .from('employees')
+          .select('*')
+          .eq('email', userEmail)
+          .maybeSingle()
+          .then(({ data: emp }) => {
+            if (emp && emp.status !== 'nonaktif') {
+              const mapped = mapEmployeeFromDB(emp);
+              setCurrentUser(mapped);
+              setActiveTab(mapped.role === 'admin' ? 'admin_dashboard' : 'employee_input');
+            }
+          });
+      }
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [loadSupabaseData]);
 
   // Login handler
   const handleLogin = (user) => {
@@ -63,92 +166,128 @@ export default function App() {
     } else {
       setActiveTab('employee_input');
     }
+    // Refresh timesheets & employees on login
+    loadSupabaseData();
   };
 
   // Logout handler
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logoutFromSupabase();
     setCurrentUser(null);
     setMobileSidebarOpen(false);
   };
 
-  // Quick switch role for testing demo
-  const handleSwitchRole = () => {
-    if (currentUser?.role === 'admin') {
-      const regularUser = employees.find(e => e.role === 'user') || employees[0];
-      setCurrentUser(regularUser);
-      setActiveTab('employee_input');
-    } else {
-      const adminUser = employees.find(e => e.role === 'admin') || {
-        id: "EMP-010",
-        namaLengkap: "Rina Kartika (HR Admin)",
-        email: "admin.hr@suluhardhi.com",
-        posisi: "HR & Operational Admin",
-        departemen: "Human Resources",
-        role: "admin",
-      };
-      setCurrentUser(adminUser);
-      setActiveTab('admin_dashboard');
-    }
-  };
-
-  // Save timesheet entry (Create or Update)
-  const handleSaveTimesheet = (entry) => {
-    setTimesheets(prev => {
-      const index = prev.findIndex(item => item.id === entry.id || (item.employeeId === entry.employeeId && item.date === entry.date));
-      if (index >= 0) {
-        const updated = [...prev];
-        updated[index] = { ...updated[index], ...entry };
-        return updated;
-      } else {
-        return [entry, ...prev];
-      }
-    });
-  };
-
-  // Save / update employee (CRUD)
-  const handleSaveEmployee = (empData) => {
-    setEmployees(prev => {
-      const index = prev.findIndex(e => e.id === empData.id);
-      if (index >= 0) {
-        const updated = [...prev];
-        updated[index] = empData;
-        return updated;
-      } else {
-        return [...prev, empData];
-      }
-    });
-  };
-
-  // Toggle employee active / inactive (Soft Delete as per PRD 6.7)
-  const handleToggleEmployeeStatus = (empId) => {
-    setEmployees(prev => {
-      return prev.map(emp => {
-        if (emp.id === empId) {
-          const newStatus = emp.status === 'aktif' ? 'nonaktif' : 'aktif';
-          return { ...emp, status: newStatus };
+  // Save timesheet entry to Supabase
+  const handleSaveTimesheet = async (entry) => {
+    try {
+      const saved = await saveTimesheetToSupabase(entry);
+      setTimesheets(prev => {
+        const index = prev.findIndex(item => item.id === saved.id || (item.employeeId === saved.employeeId && item.date === saved.date));
+        if (index >= 0) {
+          const updated = [...prev];
+          updated[index] = saved;
+          return updated;
+        } else {
+          return [saved, ...prev];
         }
-        return emp;
       });
-    });
-  };
-
-  // Save settings
-  const handleSaveSettings = (newSettings) => {
-    setSettings(newSettings);
-  };
-
-  // Reset dummy data
-  const handleResetDummyData = () => {
-    if (window.confirm("Kembalikan data ke dummy awal? Semua entri buatan Anda akan direset.")) {
-      localStorage.removeItem('sae_timesheet_employees');
-      localStorage.removeItem('sae_timesheet_data');
-      localStorage.removeItem('sae_timesheet_settings');
-      setEmployees(initialEmployees);
-      setTimesheets(initialTimesheets);
-      setSettings(initialSettings);
-      alert("Data berhasil direset ke dummy awal.");
+    } catch (err) {
+      console.error('Error saving timesheet to Supabase:', err);
+      alert('Gagal menyimpan timesheet ke database: ' + (err.message || 'Terjadi kesalahan'));
     }
   };
+
+  // Save / update employee to Supabase
+  const handleSaveEmployee = async (empData) => {
+    try {
+      const saved = await upsertEmployeeToSupabase(empData);
+      setEmployees(prev => {
+        const index = prev.findIndex(e => e.id === saved.id || e.employeeCode === saved.employeeCode);
+        if (index >= 0) {
+          const updated = [...prev];
+          updated[index] = saved;
+          return updated;
+        } else {
+          return [...prev, saved];
+        }
+      });
+    } catch (err) {
+      console.error('Error saving employee to Supabase:', err);
+      alert('Gagal menyimpan karyawan ke database: ' + (err.message || 'Terjadi kesalahan'));
+    }
+  };
+
+  // Toggle employee active / inactive in Supabase
+  const handleToggleEmployeeStatus = async (empId) => {
+    try {
+      const targetEmp = employees.find(e => e.id === empId);
+      if (!targetEmp) return;
+      const updated = await toggleEmployeeStatusInSupabase(empId, targetEmp.status);
+      setEmployees(prev => prev.map(e => e.id === empId ? updated : e));
+    } catch (err) {
+      console.error('Error toggling employee status in Supabase:', err);
+      alert('Gagal mengubah status karyawan: ' + (err.message || 'Terjadi kesalahan'));
+    }
+  };
+
+  // Save settings to Supabase
+  const handleSaveSettings = async (newSettings) => {
+    try {
+      const saved = await saveSettingsToSupabase(newSettings);
+      setSettings(saved);
+    } catch (err) {
+      console.error('Error saving settings to Supabase:', err);
+      alert('Gagal menyimpan pengaturan ke database: ' + (err.message || 'Terjadi kesalahan'));
+    }
+  };
+
+  // Permit Handlers (Izin Susulan)
+  const handleGrantPermit = async (permitData) => {
+    try {
+      const saved = await grantLateEntryPermitInSupabase(permitData);
+      setLateEntryPermits(prev => [saved, ...prev]);
+      return saved;
+    } catch (err) {
+      console.error('Error granting permit in App:', err);
+      throw err;
+    }
+  };
+
+  const handleCompletePermit = async (employeeId, date) => {
+    try {
+      await completeLateEntryPermitInSupabase(employeeId, date);
+      setLateEntryPermits(prev => prev.map(p => 
+        p.employeeId === employeeId && p.permittedDate === date 
+          ? { ...p, status: 'completed' } 
+          : p
+      ));
+    } catch (err) {
+      console.error('Error completing permit in App:', err);
+    }
+  };
+
+  const handleRevokePermit = async (permitId) => {
+    try {
+      const updated = await revokeLateEntryPermitInSupabase(permitId);
+      setLateEntryPermits(prev => prev.map(p => p.id === permitId ? updated : p));
+      return updated;
+    } catch (err) {
+      console.error('Error revoking permit in App:', err);
+      throw err;
+    }
+  };
+
+  // If initial load in progress and no user yet
+  if (isLoading && !currentUser) {
+    return (
+      <div className="min-h-screen bg-[#132438] flex flex-col items-center justify-center text-slate-100 gap-3">
+        <Loader2 className="w-8 h-8 text-sky-400 animate-spin" />
+        <span className="text-sm font-semibold tracking-wide text-sky-200">
+          Menghubungkan ke Supabase Database...
+        </span>
+      </div>
+    );
+  }
 
   // If not logged in, show LandingLoginPage with direct login
   if (!currentUser) {
@@ -162,7 +301,6 @@ export default function App() {
         currentUser={currentUser}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onSwitchRole={handleSwitchRole}
         onLogout={handleLogout}
         mobileOpen={mobileSidebarOpen}
         setMobileOpen={setMobileSidebarOpen}
@@ -174,7 +312,6 @@ export default function App() {
         <TopBar
           currentUser={currentUser}
           activeTab={activeTab}
-          onSwitchRole={handleSwitchRole}
           onToggleMobileMenu={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         />
 
@@ -200,6 +337,9 @@ export default function App() {
                   employees={employees}
                   onSaveEmployee={handleSaveEmployee}
                   onToggleStatus={handleToggleEmployeeStatus}
+                  lateEntryPermits={lateEntryPermits}
+                  onGrantPermit={handleGrantPermit}
+                  onRevokePermit={handleRevokePermit}
                 />
               )}
               {activeTab === 'admin_settings' && (
@@ -219,6 +359,8 @@ export default function App() {
                   onSaveTimesheet={handleSaveTimesheet}
                   settings={settings}
                   onNavigateToHistory={() => setActiveTab('employee_history')}
+                  lateEntryPermits={lateEntryPermits}
+                  onCompletePermit={handleCompletePermit}
                 />
               )}
               {activeTab === 'employee_history' && (
@@ -245,16 +387,13 @@ export default function App() {
           <div>
             PT Suluh Ardhi Engineering &copy; 2026. Hak Cipta Dilindungi.
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleResetDummyData}
-              className="text-[11px] text-slate-400 hover:text-red-600 transition underline cursor-pointer"
-              title="Reset data ke bawaan awal"
-            >
-              Reset Data Dummy
-            </button>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Supabase Connected
+            </span>
             <span className="text-[11px] text-slate-400">
-              Versi Demo 1.1
+              Versi Produksi 1.0
             </span>
           </div>
         </footer>

@@ -22,9 +22,11 @@ import {
   MapPin,
   Award,
   FileCheck2,
-  ArrowUpRight
+  ArrowUpRight,
+  Loader2
 } from 'lucide-react';
 import { AccessibilityWidget } from '../components/AccessibilityWidget';
+import { loginWithSupabase, registerWithSupabase } from '../lib/supabaseClient';
 
 export function LandingLoginPage({ onLogin, employees }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
@@ -33,13 +35,18 @@ export function LandingLoginPage({ onLogin, employees }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Register form state
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPhone, setRegPhone] = useState('');
-  const [regPassword, setRegPassword] = useState('');
+  const [regPosition, setRegPosition] = useState('Staff Engineering');
   const [regDepartment, setRegDepartment] = useState('Engineering');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [regLoading, setRegLoading] = useState(false);
+  const [regError, setRegError] = useState('');
   const [regSuccessMessage, setRegSuccessMessage] = useState('');
 
   // Forgot password modal
@@ -47,25 +54,8 @@ export function LandingLoginPage({ onLogin, employees }) {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
 
-  // Quick demo logins
-  const handleQuickLogin = (role) => {
-    if (role === 'admin') {
-      const adminUser = employees.find(e => e.role === 'admin') || {
-        id: "EMP-010",
-        namaLengkap: "Rina Kartika (HR Admin)",
-        email: "admin.hr@suluhardhi.com",
-        posisi: "HR & Operational Admin",
-        departemen: "Human Resources",
-        role: "admin",
-      };
-      onLogin(adminUser);
-    } else {
-      const employeeUser = employees.find(e => e.role === 'user' && e.id === 'EMP-001') || employees[0];
-      onLogin(employeeUser);
-    }
-  };
-
-  const handleStandardLogin = (e) => {
+  // Real Supabase Login
+  const handleStandardLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -74,47 +64,67 @@ export function LandingLoginPage({ onLogin, employees }) {
       return;
     }
 
-    const found = employees.find(emp => emp.email.toLowerCase() === email.trim().toLowerCase());
-    if (found) {
-      if (found.status === 'nonaktif') {
-        setErrorMessage('Akun ini telah dinonaktifkan oleh administrator.');
-        return;
-      }
-      onLogin(found);
-    } else {
-      if (email.includes('admin')) {
-        onLogin({
-          id: "EMP-010",
-          namaLengkap: "Rina Kartika (HR Admin)",
-          email: email,
-          posisi: "HR Admin",
-          departemen: "Human Resources",
-          role: "admin"
-        });
+    setLoading(true);
+    try {
+      const user = await loginWithSupabase(email, password);
+      onLogin(user);
+    } catch (err) {
+      console.error('Login error:', err);
+      if (err.message?.includes('Invalid login credentials')) {
+        setErrorMessage('Email atau kata sandi tidak sesuai. Periksa kembali akun Anda.');
       } else {
-        onLogin({
-          id: "EMP-DEMO",
-          namaLengkap: email.split('@')[0] || "Karyawan Demo",
-          email: email,
-          posisi: "Engineer",
-          departemen: "Engineering",
-          role: "user"
-        });
+        setErrorMessage(err.message || 'Terjadi kendala saat proses masuk.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    if (!regName || !regEmail || !regPassword) {
-      alert('Mohon lengkapi data registrasi.');
+    setRegError('');
+    setRegSuccessMessage('');
+
+    if (!regName.trim() || !regEmail.trim() || !regPassword.trim()) {
+      setRegError('Mohon lengkapi nama lengkap, email, dan kata sandi.');
       return;
     }
-    setRegSuccessMessage('Pendaftaran berhasil! Silakan gunakan tombol demo atau login menggunakan email Anda.');
-    setTimeout(() => {
-      setActiveTab('login');
-      setEmail(regEmail);
-    }, 1500);
+
+    if (regPassword.length < 6) {
+      setRegError('Kata sandi minimal 6 karakter.');
+      return;
+    }
+
+    if (regConfirmPassword && regPassword !== regConfirmPassword) {
+      setRegError('Konfirmasi kata sandi tidak cocok.');
+      return;
+    }
+
+    setRegLoading(true);
+    try {
+      const user = await registerWithSupabase({
+        email: regEmail,
+        password: regPassword,
+        namaLengkap: regName,
+        noTelepon: regPhone,
+        posisi: regPosition || 'Staff Engineering',
+        departemen: regDepartment,
+      });
+
+      setRegSuccessMessage('Pendaftaran berhasil! Mengarahkan ke sistem timesheet...');
+      setTimeout(() => {
+        onLogin(user);
+      }, 800);
+    } catch (err) {
+      console.error('Registration error:', err);
+      if (err.message?.includes('already registered') || err.message?.includes('duplicate key') || err.message?.includes('User already registered')) {
+        setRegError('Email ini sudah terdaftar. Silakan login pada tab Masuk.');
+      } else {
+        setRegError(err.message || 'Gagal mendaftarkan akun. Silakan coba kembali.');
+      }
+    } finally {
+      setRegLoading(false);
+    }
   };
 
   const scrollToLogin = () => {
@@ -232,60 +242,8 @@ export function LandingLoginPage({ onLogin, employees }) {
 
           {/* Right Column: Direct Integrated Login Card */}
           <div id="login-section" className="lg:col-span-5">
-            {/* QUICK DEMO ACCESS PANEL */}
-            <div className="mb-4 bg-white/6 border border-white/10 rounded-2xl p-4">
-              <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/8">
-                <div className="flex items-center gap-2">
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-400"></span>
-                  <span className="text-xs font-semibold text-sky-100">
-                    Akses cepat demo presensi
-                  </span>
-                </div>
-                <span className="text-[10px] bg-sky-400/15 text-sky-200 px-2 py-0.5 rounded-full font-medium">
-                  Demo 1-klik
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-300 mb-3">
-                Pilih peran di bawah untuk langsung mencoba aplikasi tanpa perlu login manual:
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {/* Demo Button: Karyawan */}
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('user')}
-                  className="flex items-start gap-2.5 p-2.5 text-left rounded-2xl border border-sky-300/25 hover:border-sky-300/50 bg-sky-400/10 hover:bg-sky-400/16 cursor-pointer group"
-                >
-                  <div className="p-2 rounded-xl bg-sky-500 text-white shrink-0">
-                    <UserCheck className="w-4 h-4" />
-                  </div>
-                  <div className="overflow-hidden">
-                    <div className="text-[10px] font-medium text-sky-200">Masuk sebagai</div>
-                    <div className="text-xs font-semibold text-white truncate">Karyawan (User)</div>
-                    <div className="text-[10px] text-slate-300 truncate">Budi Santoso • Drafter</div>
-                  </div>
-                </button>
-
-                {/* Demo Button: Admin */}
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('admin')}
-                  className="flex items-start gap-2.5 p-2.5 text-left rounded-2xl border border-amber-300/25 hover:border-amber-300/50 bg-amber-400/10 hover:bg-amber-400/16 cursor-pointer group"
-                >
-                  <div className="p-2 rounded-xl bg-amber-400 text-slate-950 shrink-0">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div className="overflow-hidden">
-                    <div className="text-[10px] font-medium text-amber-200">Masuk sebagai</div>
-                    <div className="text-xs font-semibold text-white truncate">Admin HR & Rekap</div>
-                    <div className="text-[10px] text-slate-300 truncate">Rina Kartika • HR Admin</div>
-                  </div>
-                </button>
-              </div>
-            </div>
-
             {/* Standard Login & Register Card */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 shadow-[0_24px_50px_-24px_rgba(8,20,40,0.55)] text-slate-700 border border-white/60">
+            <div className="bg-white rounded-3xl p-6 sm:p-7 shadow-[0_24px_50px_-24px_rgba(8,20,40,0.55)] text-slate-700 border border-white/60">
               {/* Tab Selector */}
               <div className="flex border-b border-slate-200 mb-5">
                 <button
@@ -313,14 +271,14 @@ export function LandingLoginPage({ onLogin, employees }) {
               </div>
 
               {errorMessage && (
-                <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 flex items-start gap-2 text-xs text-red-800">
+                <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2 text-xs text-red-800">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               {regSuccessMessage && (
-                <div className="mb-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-2 text-xs text-emerald-800">
+                <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2 text-xs text-emerald-800">
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
                   <span>{regSuccessMessage}</span>
                 </div>
@@ -329,37 +287,39 @@ export function LandingLoginPage({ onLogin, employees }) {
               {activeTab === 'login' ? (
                 <form onSubmit={handleStandardLogin} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
-                      Email Perusahaan
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                      Email Akun
                     </label>
                     <input
                       type="email"
+                      required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="nama.karyawan@suluhardhi.com"
-                      className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
+                      placeholder="admin@gmail.com / test1@gmail.com"
+                      className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/60 font-medium transition"
                     />
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-medium text-slate-600">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold text-slate-600">
                         Kata Sandi
                       </label>
                       <button
                         type="button"
                         onClick={() => setShowForgotPassword(true)}
-                        className="text-xs text-blue-700 hover:underline"
+                        className="text-xs text-blue-700 hover:underline cursor-pointer"
                       >
                         Lupa password?
                       </button>
                     </div>
                     <input
                       type="password"
+                      required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
+                      className="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/60 font-medium transition"
                     />
                   </div>
 
@@ -372,17 +332,41 @@ export function LandingLoginPage({ onLogin, employees }) {
 
                   <button
                     type="submit"
-                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-[#1B365D] hover:bg-[#16304f] text-white font-semibold text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
+                    disabled={loading}
+                    className="w-full mt-2 py-3 px-4 rounded-xl bg-[#1B365D] hover:bg-[#16304f] disabled:opacity-60 text-white font-bold text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2 shadow-sm hover:shadow transition"
                   >
-                    <LogIn className="w-4 h-4" />
-                    Masuk ke Sistem Timesheet
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Memverifikasi Akun...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-4 h-4" />
+                        <span>Masuk ke Sistem Timesheet</span>
+                      </>
+                    )}
                   </button>
                 </form>
               ) : (
-                <form onSubmit={handleRegisterSubmit} className="space-y-3">
+                <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+                  {regError && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                      <span>{regError}</span>
+                    </div>
+                  )}
+
+                  {regSuccessMessage && (
+                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+                      <span>{regSuccessMessage}</span>
+                    </div>
+                  )}
+
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
-                      Nama Lengkap
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Nama Lengkap & Gelar
                     </label>
                     <input
                       type="text"
@@ -390,45 +374,45 @@ export function LandingLoginPage({ onLogin, employees }) {
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
                       placeholder="Contoh: Rian Pratama, S.T."
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
-                      Email Perusahaan
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Email Akun
                     </label>
                     <input
                       type="email"
                       required
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
-                      placeholder="rian.p@suluhardhi.com"
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
+                      placeholder="nama.anda@gmail.com / perusahaaan"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
-                        No. Telepon / WA
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Posisi / Jabatan
                       </label>
                       <input
-                        type="tel"
-                        value={regPhone}
-                        onChange={(e) => setRegPhone(e.target.value)}
-                        placeholder="0812-xxxx-xxxx"
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                        type="text"
+                        value={regPosition}
+                        onChange={(e) => setRegPosition(e.target.value)}
+                        placeholder="Piping Engineer / Drafter"
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
                         Departemen
                       </label>
                       <select
                         value={regDepartment}
                         onChange={(e) => setRegDepartment(e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
                       >
                         <option value="Engineering">Engineering</option>
                         <option value="Operations">Operations</option>
@@ -439,29 +423,67 @@ export function LandingLoginPage({ onLogin, employees }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
-                      Kata Sandi
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      No. Telepon / WhatsApp
                     </label>
                     <input
-                      type="password"
-                      required
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder="Minimal 6 karakter"
-                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
+                      type="tel"
+                      value={regPhone}
+                      onChange={(e) => setRegPhone(e.target.value)}
+                      placeholder="0812-xxxx-xxxx"
+                      className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
                     />
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Kata Sandi
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={regPassword}
+                        onChange={(e) => setRegPassword(e.target.value)}
+                        placeholder="Min. 6 karakter"
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Ulangi Sandi
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        value={regConfirmPassword}
+                        onChange={(e) => setRegConfirmPassword(e.target.value)}
+                        placeholder="Konfirmasi sandi"
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
+                      />
+                    </div>
+                  </div>
+
                   <p className="text-[11px] text-slate-500">
-                    * Akun baru otomatis aktif untuk mengisi form timesheet harian.
+                    * Akun baru langsung aktif di Supabase dan dapat digunakan seketika tanpa perlu verifikasi email.
                   </p>
 
                   <button
                     type="submit"
-                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-semibold text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
+                    disabled={regLoading}
+                    className="w-full mt-2 py-3 px-4 rounded-xl bg-[#1B365D] hover:bg-[#16304f] disabled:opacity-60 text-white font-bold text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2 shadow-sm hover:shadow transition"
                   >
-                    <UserPlus className="w-4 h-4" />
-                    Daftar Sekarang
+                    {regLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Mendaftarkan Akun ke Supabase...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        <span>Daftar Akun Baru Sekarang</span>
+                      </>
+                    )}
                   </button>
                 </form>
               )}

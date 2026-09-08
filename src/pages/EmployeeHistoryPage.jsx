@@ -15,7 +15,7 @@ import {
   ArrowUpDown,
   Sparkles
 } from 'lucide-react';
-import { calculateTimesheetMetrics } from '../utils/timeCalculations';
+import { calculateTimesheetMetrics, getTodayWIB } from '../utils/timeCalculations';
 
 export function EmployeeHistoryPage({ 
   currentUser, 
@@ -24,10 +24,11 @@ export function EmployeeHistoryPage({
   settings, 
   onNavigateToInput 
 }) {
-  const todayStr = "2026-09-07";
+  const todayWIB = getTodayWIB();
+  const [currentYear, currentMonth] = todayWIB.split('-');
 
-  const [selectedMonth, setSelectedMonth] = useState("09");
-  const [selectedYear, setSelectedYear] = useState("2026");
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
   const [searchTerm, setSearchTerm] = useState("");
 
   // Edit Modal State
@@ -282,7 +283,7 @@ export function EmployeeHistoryPage({
                 </tr>
               ) : (
                 filteredList.map((entry) => {
-                  const isToday = entry.date === todayStr;
+                  const isToday = entry.date === todayWIB;
                   return (
                     <tr key={entry.id} className="hover:bg-blue-50/40 transition">
                       <td className="py-4 px-4 whitespace-nowrap font-semibold text-slate-900">
