@@ -123,13 +123,13 @@ export function LandingLoginPage({ onLogin, employees }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0E1B2E] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#132438] text-slate-100 flex flex-col font-sans">
       {/* 1. TOP HEADER / NAV BAR */}
-      <header className="sticky top-0 z-40 bg-[#0A1424]/90 backdrop-blur-md border-b border-[#1A2E4B] px-4 sm:px-8 py-3.5">
+      <header className="sticky top-0 z-40 bg-[#122334]/80 backdrop-blur-md border-b border-white/8 px-4 sm:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Brand Logo & Tagline */}
           <div className="flex items-center gap-3.5">
-            <div className="h-10 px-2.5 py-1 bg-white rounded-lg flex items-center shadow-xs">
+            <div className="h-10 px-2.5 py-1 bg-white rounded-xl flex items-center shadow-sm">
               <img 
                 src="/logopt.png" 
                 alt="PT Suluh Ardhi Engineering" 
@@ -140,9 +140,9 @@ export function LandingLoginPage({ onLogin, employees }) {
                 }}
               />
             </div>
-            <div className="hidden sm:block border-l border-slate-700 pl-3">
-              <span className="text-xs font-bold tracking-wider text-blue-400 uppercase block">
-                BUILD ON SYNERGY
+            <div className="hidden sm:block border-l border-white/15 pl-3">
+              <span className="text-xs font-semibold tracking-wide text-sky-300 block">
+                Build on synergy
               </span>
               <span className="text-[11px] text-slate-400">
                 PT Suluh Ardhi Engineering
@@ -151,11 +151,11 @@ export function LandingLoginPage({ onLogin, employees }) {
           </div>
 
           {/* Nav Anchors */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
-            <a href="#about" className="hover:text-blue-400 transition">Sekilas SAE</a>
-            <a href="#business" className="hover:text-blue-400 transition">Bidang Usaha</a>
-            <a href="#services" className="hover:text-blue-400 transition">Layanan EPC</a>
-            <a href="#contact" className="hover:text-blue-400 transition">Kontak</a>
+          <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-300">
+            <a href="#about" className="hover:text-sky-300">Sekilas SAE</a>
+            <a href="#business" className="hover:text-sky-300">Bidang Usaha</a>
+            <a href="#services" className="hover:text-sky-300">Layanan EPC</a>
+            <a href="#contact" className="hover:text-sky-300">Kontak</a>
           </nav>
 
           {/* Accessibility Font Resizer & Login CTA */}
@@ -163,7 +163,7 @@ export function LandingLoginPage({ onLogin, employees }) {
             <AccessibilityWidget inline={true} />
             <button
               onClick={scrollToLogin}
-              className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Masuk Portal</span>
@@ -173,7 +173,7 @@ export function LandingLoginPage({ onLogin, employees }) {
       </header>
 
       {/* 2. HERO SECTION WITH INTEGRATED DIRECT LOGIN CARD */}
-      <section className="relative pt-8 pb-16 px-4 sm:px-8 overflow-hidden bg-gradient-to-b from-[#0A1424] via-[#0E1B2E] to-[#12223B]">
+      <section className="relative pt-8 pb-16 px-4 sm:px-8 overflow-hidden bg-gradient-to-b from-[#122334] via-[#163044] to-[#1a3654]">
         {/* Subtle background glow effect */}
         <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-red-600/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -181,16 +181,16 @@ export function LandingLoginPage({ onLogin, employees }) {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
           {/* Left Column: Company Showcase */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 border border-blue-500/30 text-blue-300 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-400/10 border border-sky-300/20 text-sky-200 text-xs font-medium">
               <Award className="w-3.5 h-3.5 text-blue-400" />
               <span>Engineering, Procurement & Construction (EPC) Specialist</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
-              BUILD ON <span className="text-blue-400">SYNERGY</span>.
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight leading-[1.15]">
+              Build on <span className="text-sky-300">synergy</span>.
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-normal">
+            <p className="text-sm sm:text-base text-slate-300/95 leading-relaxed max-w-2xl font-normal">
               <strong>PT. Suluh Ardhi Engineering (SAE)</strong> is <em>Your Ideal Partner</em> to perform and deliver <span className="text-white font-semibold">GOOD</span> product & service, <span className="text-white font-semibold">BETTER</span> EPC Business, and <span className="text-white font-semibold">BEST</span> environment to life.
             </p>
 
@@ -200,16 +200,16 @@ export function LandingLoginPage({ onLogin, employees }) {
 
             {/* Quick Metrics Badges */}
             <div className="grid grid-cols-3 gap-3 pt-2 max-w-lg">
-              <div className="p-3 rounded-xl bg-[#172B47]/80 border border-[#26446E]">
-                <div className="text-xl sm:text-2xl font-extrabold text-white">25+</div>
+              <div className="p-3 rounded-2xl bg-white/6 border border-white/10">
+                <div className="text-xl sm:text-2xl font-semibold text-white">25+</div>
                 <div className="text-[11px] text-slate-300 mt-0.5">Tahun Pengalaman Tim</div>
               </div>
-              <div className="p-3 rounded-xl bg-[#172B47]/80 border border-[#26446E]">
-                <div className="text-xl sm:text-2xl font-extrabold text-blue-400">160+</div>
+              <div className="p-3 rounded-2xl bg-white/6 border border-white/10">
+                <div className="text-xl sm:text-2xl font-semibold text-sky-300">160+</div>
                 <div className="text-[11px] text-slate-300 mt-0.5">Karyawan & Staf Ahli</div>
               </div>
-              <div className="p-3 rounded-xl bg-[#172B47]/80 border border-[#26446E]">
-                <div className="text-xl sm:text-2xl font-extrabold text-amber-400">4+</div>
+              <div className="p-3 rounded-2xl bg-white/6 border border-white/10">
+                <div className="text-xl sm:text-2xl font-semibold text-amber-300">4+</div>
                 <div className="text-[11px] text-slate-300 mt-0.5">Sektor Industri Inti</div>
               </div>
             </div>
@@ -233,19 +233,16 @@ export function LandingLoginPage({ onLogin, employees }) {
           {/* Right Column: Direct Integrated Login Card */}
           <div id="login-section" className="lg:col-span-5">
             {/* QUICK DEMO ACCESS PANEL */}
-            <div className="mb-4 bg-[#142640] border border-[#23426D] rounded-2xl p-4 shadow-lg">
-              <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#1E395F]">
+            <div className="mb-4 bg-white/6 border border-white/10 rounded-2xl p-4">
+              <div className="flex items-center justify-between mb-2 pb-2 border-b border-white/8">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-2.5 w-2.5 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
-                  </span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-blue-200">
-                    Akses Cepat Demo Presensi
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-400"></span>
+                  <span className="text-xs font-semibold text-sky-100">
+                    Akses cepat demo presensi
                   </span>
                 </div>
-                <span className="text-[10px] bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded font-bold">
-                  Demo 1-Klik
+                <span className="text-[10px] bg-sky-400/15 text-sky-200 px-2 py-0.5 rounded-full font-medium">
+                  Demo 1-klik
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 mb-3">
@@ -257,14 +254,14 @@ export function LandingLoginPage({ onLogin, employees }) {
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('user')}
-                  className="flex items-start gap-2.5 p-2.5 text-left rounded-xl border border-blue-400/40 hover:border-blue-400 bg-blue-900/30 hover:bg-blue-900/50 transition cursor-pointer group"
+                  className="flex items-start gap-2.5 p-2.5 text-left rounded-2xl border border-sky-300/25 hover:border-sky-300/50 bg-sky-400/10 hover:bg-sky-400/16 cursor-pointer group"
                 >
-                  <div className="p-2 rounded-lg bg-blue-600 text-white shrink-0 group-hover:scale-105 transition shadow-xs">
+                  <div className="p-2 rounded-xl bg-sky-500 text-white shrink-0">
                     <UserCheck className="w-4 h-4" />
                   </div>
                   <div className="overflow-hidden">
-                    <div className="text-[10px] font-bold uppercase text-blue-300">Masuk sebagai</div>
-                    <div className="text-xs font-bold text-white truncate">Karyawan (User)</div>
+                    <div className="text-[10px] font-medium text-sky-200">Masuk sebagai</div>
+                    <div className="text-xs font-semibold text-white truncate">Karyawan (User)</div>
                     <div className="text-[10px] text-slate-300 truncate">Budi Santoso • Drafter</div>
                   </div>
                 </button>
@@ -273,14 +270,14 @@ export function LandingLoginPage({ onLogin, employees }) {
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('admin')}
-                  className="flex items-start gap-2.5 p-2.5 text-left rounded-xl border border-amber-400/40 hover:border-amber-400 bg-amber-950/40 hover:bg-amber-950/60 transition cursor-pointer group"
+                  className="flex items-start gap-2.5 p-2.5 text-left rounded-2xl border border-amber-300/25 hover:border-amber-300/50 bg-amber-400/10 hover:bg-amber-400/16 cursor-pointer group"
                 >
-                  <div className="p-2 rounded-lg bg-amber-500 text-slate-950 shrink-0 group-hover:scale-105 transition shadow-xs">
+                  <div className="p-2 rounded-xl bg-amber-400 text-slate-950 shrink-0">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div className="overflow-hidden">
-                    <div className="text-[10px] font-bold uppercase text-amber-300">Masuk sebagai</div>
-                    <div className="text-xs font-bold text-white truncate">Admin HR & Rekap</div>
+                    <div className="text-[10px] font-medium text-amber-200">Masuk sebagai</div>
+                    <div className="text-xs font-semibold text-white truncate">Admin HR & Rekap</div>
                     <div className="text-[10px] text-slate-300 truncate">Rina Kartika • HR Admin</div>
                   </div>
                 </button>
@@ -288,7 +285,7 @@ export function LandingLoginPage({ onLogin, employees }) {
             </div>
 
             {/* Standard Login & Register Card */}
-            <div className="bg-white rounded-2xl p-6 sm:p-7 shadow-2xl text-slate-800 border border-slate-200">
+            <div className="bg-white rounded-2xl p-6 sm:p-7 shadow-[0_24px_50px_-24px_rgba(8,20,40,0.55)] text-slate-700 border border-white/60">
               {/* Tab Selector */}
               <div className="flex border-b border-slate-200 mb-5">
                 <button
@@ -332,7 +329,7 @@ export function LandingLoginPage({ onLogin, employees }) {
               {activeTab === 'login' ? (
                 <form onSubmit={handleStandardLogin} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
                       Email Perusahaan
                     </label>
                     <input
@@ -346,7 +343,7 @@ export function LandingLoginPage({ onLogin, employees }) {
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-bold text-slate-700 uppercase">
+                      <label className="block text-xs font-medium text-slate-600">
                         Kata Sandi
                       </label>
                       <button
@@ -375,7 +372,7 @@ export function LandingLoginPage({ onLogin, employees }) {
 
                   <button
                     type="submit"
-                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-[#1B365D] hover:bg-[#142642] text-white font-bold text-xs sm:text-sm shadow-xs transition cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-[#1B365D] hover:bg-[#16304f] text-white font-semibold text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
                   >
                     <LogIn className="w-4 h-4" />
                     Masuk ke Sistem Timesheet
@@ -384,7 +381,7 @@ export function LandingLoginPage({ onLogin, employees }) {
               ) : (
                 <form onSubmit={handleRegisterSubmit} className="space-y-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
                       Nama Lengkap
                     </label>
                     <input
@@ -398,7 +395,7 @@ export function LandingLoginPage({ onLogin, employees }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
                       Email Perusahaan
                     </label>
                     <input
@@ -413,7 +410,7 @@ export function LandingLoginPage({ onLogin, employees }) {
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      <label className="block text-xs font-medium text-slate-600 mb-1">
                         No. Telepon / WA
                       </label>
                       <input
@@ -425,7 +422,7 @@ export function LandingLoginPage({ onLogin, employees }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      <label className="block text-xs font-medium text-slate-600 mb-1">
                         Departemen
                       </label>
                       <select
@@ -442,7 +439,7 @@ export function LandingLoginPage({ onLogin, employees }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">
                       Kata Sandi
                     </label>
                     <input
@@ -461,7 +458,7 @@ export function LandingLoginPage({ onLogin, employees }) {
 
                   <button
                     type="submit"
-                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs sm:text-sm shadow-xs transition cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-semibold text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2"
                   >
                     <UserPlus className="w-4 h-4" />
                     Daftar Sekarang
@@ -474,13 +471,13 @@ export function LandingLoginPage({ onLogin, employees }) {
       </section>
 
       {/* 3. BUSINESS FIELDS SECTION (OUR BUSINESS FIELDS) */}
-      <section id="business" className="py-16 px-4 sm:px-8 bg-[#0B1626] border-t border-[#192E4C]">
+      <section id="business" className="py-16 px-4 sm:px-8 bg-[#122334] border-t border-white/8">
         <div className="max-w-7xl mx-auto space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
-              Fokus Portofolio Industri
+            <span className="text-xs font-medium tracking-wide text-sky-300">
+              Fokus portofolio industri
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
               Our Business Fields
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -490,11 +487,11 @@ export function LandingLoginPage({ onLogin, employees }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* Card 1: Oil & Gas */}
-            <div className="p-6 rounded-2xl bg-[#13233A] border border-[#223E66] hover:border-blue-500 transition group space-y-3">
-              <div className="p-3 rounded-xl bg-blue-600/20 text-blue-400 w-fit group-hover:scale-110 transition">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-300/30 group space-y-3">
+              <div className="p-3 rounded-xl bg-sky-400/12 text-sky-300 w-fit">
                 <Fuel className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-white group-hover:text-blue-300 transition">
+              <h3 className="text-base font-semibold text-white group-hover:text-sky-200">
                 Oil & Gas
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
@@ -503,11 +500,11 @@ export function LandingLoginPage({ onLogin, employees }) {
             </div>
 
             {/* Card 2: Petrochemical */}
-            <div className="p-6 rounded-2xl bg-[#13233A] border border-[#223E66] hover:border-blue-500 transition group space-y-3">
-              <div className="p-3 rounded-xl bg-blue-600/20 text-blue-400 w-fit group-hover:scale-110 transition">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-300/30 group space-y-3">
+              <div className="p-3 rounded-xl bg-sky-400/12 text-sky-300 w-fit">
                 <Cpu className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-white group-hover:text-blue-300 transition">
+              <h3 className="text-base font-semibold text-white group-hover:text-sky-200">
                 Petrochemical
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
@@ -516,11 +513,11 @@ export function LandingLoginPage({ onLogin, employees }) {
             </div>
 
             {/* Card 3: Power Plant */}
-            <div className="p-6 rounded-2xl bg-[#13233A] border border-[#223E66] hover:border-blue-500 transition group space-y-3">
-              <div className="p-3 rounded-xl bg-blue-600/20 text-blue-400 w-fit group-hover:scale-110 transition">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-300/30 group space-y-3">
+              <div className="p-3 rounded-xl bg-sky-400/12 text-sky-300 w-fit">
                 <Zap className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-white group-hover:text-blue-300 transition">
+              <h3 className="text-base font-semibold text-white group-hover:text-sky-200">
                 Power Plant
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
@@ -529,11 +526,11 @@ export function LandingLoginPage({ onLogin, employees }) {
             </div>
 
             {/* Card 4: Mining & Minerals */}
-            <div className="p-6 rounded-2xl bg-[#13233A] border border-[#223E66] hover:border-blue-500 transition group space-y-3">
-              <div className="p-3 rounded-xl bg-blue-600/20 text-blue-400 w-fit group-hover:scale-110 transition">
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-sky-300/30 group space-y-3">
+              <div className="p-3 rounded-xl bg-sky-400/12 text-sky-300 w-fit">
                 <Mountain className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-white group-hover:text-blue-300 transition">
+              <h3 className="text-base font-semibold text-white group-hover:text-sky-200">
                 Mining & Resources
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
@@ -545,13 +542,13 @@ export function LandingLoginPage({ onLogin, employees }) {
       </section>
 
       {/* 4. CAPABILITIES & SERVICES SECTION */}
-      <section id="services" className="py-16 px-4 sm:px-8 bg-[#0E1B2E] border-t border-[#192E4C]">
+      <section id="services" className="py-16 px-4 sm:px-8 bg-[#163044] border-t border-white/8">
         <div className="max-w-7xl mx-auto space-y-10">
           <div className="text-center max-w-3xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
-              Layanan Terintegrasi
+            <span className="text-xs font-medium tracking-wide text-sky-300">
+              Layanan terintegrasi
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
               Capabilities & Engineering Services
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -561,13 +558,13 @@ export function LandingLoginPage({ onLogin, employees }) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Service 1: Planning Phase */}
-            <div className="p-6 rounded-2xl bg-[#142640] border border-[#24426A] space-y-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-blue-400">Fase 01</div>
-              <h3 className="text-lg font-bold text-white">Planning & FEED Phase</h3>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="text-xs font-medium tracking-wide text-sky-300">Fase 01</div>
+              <h3 className="text-lg font-semibold text-white">Planning & FEED Phase</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
                 Feasibility Study (FS), Pre-FS, dan Front End Engineering Design (FEED) yang didukung insinyur senior lintas disiplin.
               </p>
-              <ul className="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-[#1E395F]">
+              <ul className="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-white/8">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" /> Plant Layout & Site Evaluation
                 </li>
@@ -581,13 +578,13 @@ export function LandingLoginPage({ onLogin, employees }) {
             </div>
 
             {/* Service 2: Detailed Engineering Design */}
-            <div className="p-6 rounded-2xl bg-[#142640] border border-[#24426A] space-y-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-blue-400">Fase 02</div>
-              <h3 className="text-lg font-bold text-white">Detailed Engineering (DED)</h3>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="text-xs font-medium tracking-wide text-sky-300">Fase 02</div>
+              <h3 className="text-lg font-semibold text-white">Detailed Engineering (DED)</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
                 Perhitungan mekanikal, pemodelan 3D, isometrik piping, kalkulasi struktur baja, dan load flow diagram elektrikal/instrumentasi.
               </p>
-              <ul className="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-[#1E395F]">
+              <ul className="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-white/8">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" /> Piping Stress Analysis (Caesar II)
                 </li>
@@ -601,13 +598,13 @@ export function LandingLoginPage({ onLogin, employees }) {
             </div>
 
             {/* Service 3: Construction & Site Support */}
-            <div className="p-6 rounded-2xl bg-[#142640] border border-[#24426A] space-y-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-blue-400">Fase 03</div>
-              <h3 className="text-lg font-bold text-white">Site Support & Quality Assurance</h3>
+            <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div className="text-xs font-medium tracking-wide text-sky-300">Fase 03</div>
+              <h3 className="text-lg font-semibold text-white">Site Support & Quality Assurance</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
                 Supervisi inspeksi mutu di lapangan, koordinasi QA/QC pengelasan pipa, audit K3L/HSE, dan verifikasi as-built drawing.
               </p>
-              <ul className="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-[#1E395F]">
+              <ul className="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-white/8">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" /> Visual Inspection & NDT Supervision
                 </li>
@@ -624,13 +621,13 @@ export function LandingLoginPage({ onLogin, employees }) {
       </section>
 
       {/* 5. ABOUT AT A GLANCE SECTION */}
-      <section id="about" className="py-16 px-4 sm:px-8 bg-[#0A1424] border-t border-[#192E4C]">
+      <section id="about" className="py-16 px-4 sm:px-8 bg-[#101f31] border-t border-white/8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
-              Sekilas Perusahaan
+            <span className="text-xs font-medium tracking-wide text-sky-300">
+              Sekilas perusahaan
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
               SAE at a Glance
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -642,7 +639,7 @@ export function LandingLoginPage({ onLogin, employees }) {
             <div className="pt-2">
               <button
                 onClick={scrollToLogin}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs cursor-pointer"
               >
                 <span>Masuk ke Sistem Presensi</span>
                 <ChevronRight className="w-4 h-4" />
@@ -650,11 +647,11 @@ export function LandingLoginPage({ onLogin, employees }) {
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#13233A] border border-[#223E66] space-y-4 text-xs">
-            <div className="flex items-center gap-3 pb-3 border-b border-[#1E395F]">
-              <Building2 className="w-5 h-5 text-blue-400" />
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider">
-                Informasi Kantor Pusat
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4 text-xs">
+            <div className="flex items-center gap-3 pb-3 border-b border-white/8">
+              <Building2 className="w-5 h-5 text-sky-300" />
+              <h4 className="text-sm font-semibold text-white">
+                Informasi kantor pusat
               </h4>
             </div>
             <div className="space-y-2.5 text-slate-300 leading-relaxed">
@@ -679,7 +676,7 @@ export function LandingLoginPage({ onLogin, employees }) {
       </section>
 
       {/* 6. FOOTER */}
-      <footer id="contact" className="py-8 px-4 sm:px-8 bg-[#070D18] border-t border-slate-900 text-slate-400 text-xs">
+      <footer id="contact" className="py-8 px-4 sm:px-8 bg-[#0d1826] border-t border-white/8 text-slate-400 text-xs">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
             <p className="font-medium text-slate-300">

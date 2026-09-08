@@ -156,7 +156,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] flex font-sans text-slate-800 antialiased">
+    <div className="min-h-screen bg-transparent flex font-sans text-slate-700 antialiased">
       {/* Sidebar Navigation */}
       <Sidebar
         currentUser={currentUser}
@@ -241,7 +241,7 @@ export default function App() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-500 no-print flex flex-col sm:flex-row items-center justify-between gap-2">
+        <footer className="bg-white/70 backdrop-blur-sm border-t border-slate-200/60 py-4 px-6 text-center text-xs text-slate-500 no-print flex flex-col sm:flex-row items-center justify-between gap-2">
           <div>
             PT Suluh Ardhi Engineering &copy; 2026. Hak Cipta Dilindungi.
           </div>

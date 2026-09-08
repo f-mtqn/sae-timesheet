@@ -128,7 +128,7 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
       {/* Title & Actions Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-[#1B365D] tracking-tight flex items-center gap-2">
             <Layers className="w-6 h-6 text-[#1B365D]" />
             Dashboard Monitoring Timesheet
           </h2>
@@ -157,74 +157,83 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
         </div>
       </div>
 
-      {/* KPI SUMMARY CARDS */}
+      {/* KPI SUMMARY CARDS WITH SUBTLE ACCENTS & MICRO-INDICATORS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Karyawan */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold uppercase text-slate-500">Karyawan Aktif</span>
-            <div className="text-2xl font-extrabold text-slate-900 mt-1">
-              {kpiStats.activeEmployeesCount} <span className="text-xs font-normal text-slate-500">orang</span>
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Karyawan Aktif</span>
+            <div className="p-2.5 rounded-2xl bg-blue-50 text-blue-600">
+              <Users className="w-5 h-5" />
             </div>
-            <span className="text-[11px] text-slate-400 mt-0.5 block">Seluruh divisi terdaftar</span>
           </div>
-          <div className="p-3 rounded-xl bg-blue-50 text-[#1B365D]">
-            <Users className="w-6 h-6" />
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+            {kpiStats.activeEmployeesCount} <span className="text-xs font-normal text-slate-400">orang</span>
+          </div>
+          <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>100% status aktif</span>
           </div>
         </div>
 
         {/* Card 2: Total Jam Kerja */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold uppercase text-slate-500">Total Jam Kerja</span>
-            <div className="text-2xl font-extrabold text-[#1B365D] mt-1">
-              {kpiStats.totalHours} <span className="text-xs font-normal text-slate-500">jam</span>
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Total Jam Kerja</span>
+            <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600">
+              <Clock className="w-5 h-5" />
             </div>
-            <span className="text-[11px] text-slate-400 mt-0.5 block">Akumulasi periode terpilih</span>
           </div>
-          <div className="p-3 rounded-xl bg-blue-50 text-[#1B365D]">
-            <Clock className="w-6 h-6" />
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#1B365D] mt-2">
+            {kpiStats.totalHours} <span className="text-xs font-normal text-slate-400">jam</span>
+          </div>
+          <div className="mt-1 flex items-center gap-1.5 text-[11px] text-indigo-600 font-medium">
+            <span>Akumulasi periode terpilih</span>
           </div>
         </div>
 
         {/* Card 3: Total Keterlambatan */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold uppercase text-slate-500">Keterlambatan</span>
-            <div className="text-2xl font-extrabold text-red-600 mt-1">
-              {kpiStats.totalLateIncidents} <span className="text-xs font-normal text-slate-500">kejadian</span>
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-red-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Keterlambatan</span>
+            <div className="p-2.5 rounded-2xl bg-red-50 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
             </div>
-            <span className="text-[11px] text-red-500 mt-0.5 block font-medium">
-              Total {kpiStats.totalLateMinutes} menit telat
-            </span>
           </div>
-          <div className="p-3 rounded-xl bg-red-50 text-red-600">
-            <AlertTriangle className="w-6 h-6" />
+          <div className="text-2xl sm:text-3xl font-extrabold text-red-600 mt-2">
+            {kpiStats.totalLateIncidents} <span className="text-xs font-normal text-slate-400">kejadian</span>
+          </div>
+          <div className="mt-1 text-[11px] text-red-500 font-semibold truncate">
+            Total {kpiStats.totalLateMinutes} menit selisih
           </div>
         </div>
 
         {/* Card 4: Total Lembur */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold uppercase text-slate-500">Total Lembur</span>
-            <div className="text-2xl font-extrabold text-emerald-700 mt-1">
-              +{kpiStats.totalOvertimeHours} <span className="text-xs font-normal text-slate-500">jam</span>
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Total Lembur</span>
+            <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600">
+              <TrendingUp className="w-5 h-5" />
             </div>
-            <span className="text-[11px] text-emerald-600 mt-0.5 block font-medium">
-              Sesuai pembulatan {settings?.pembulatanLembur || 30}m
-            </span>
           </div>
-          <div className="p-3 rounded-xl bg-emerald-50 text-emerald-700">
-            <TrendingUp className="w-6 h-6" />
+          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-2">
+            +{kpiStats.totalOvertimeHours} <span className="text-xs font-normal text-slate-400">jam</span>
+          </div>
+          <div className="mt-1 text-[11px] text-emerald-600 font-medium truncate">
+            Pembulatan {settings?.pembulatanLembur || 30} menit
           </div>
         </div>
       </div>
 
       {/* FILTER & SEARCH PANEL */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4 no-print">
+      <div className="bg-white/95 p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-4 no-print card-hover">
         <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-700">
-          <Filter className="w-4 h-4 text-[#1B365D]" />
-          Filter & Pencarian Data
+          <Filter className="w-4 h-4 text-blue-600" />
+          <span>Filter & Pencarian Monitoring</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
@@ -232,13 +241,13 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
           <div className="lg:col-span-2">
             <label className="block text-slate-600 font-semibold mb-1">Cari Karyawan / Tugas</label>
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Ketik nama karyawan, jabatan, atau aktivitas..."
-                className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
+                className="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/60 font-medium transition"
               />
             </div>
           </div>
@@ -249,7 +258,7 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
             <select
               value={selectedEmployeeId}
               onChange={(e) => setSelectedEmployeeId(e.target.value)}
-              className="w-full py-2 px-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-white"
+              className="w-full py-2.5 px-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/60 font-medium transition text-slate-800"
             >
               <option value="all">Semua Karyawan</option>
               {employees.map(emp => (
@@ -264,7 +273,7 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full py-2 px-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-white"
+              className="w-full py-2.5 px-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/60 font-medium transition text-slate-800"
             >
               <option value="all">Semua Status</option>
               <option value="normal">Tepat Waktu / Normal</option>
@@ -280,7 +289,7 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="w-full py-2 px-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-white"
+                className="w-full py-2.5 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/60 font-medium transition text-slate-800"
               >
                 <option value="all">Semua</option>
                 <option value="09">September</option>
@@ -290,7 +299,7 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="w-full py-2 px-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-white"
+                className="w-full py-2.5 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/60 font-medium transition text-slate-800"
               >
                 <option value="2026">2026</option>
                 <option value="2025">2025</option>
@@ -306,11 +315,13 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="py-1 px-2 border border-slate-200 rounded bg-white text-slate-700 text-xs"
+              className="py-1.5 px-3 border border-slate-200 rounded-xl bg-slate-50/60 text-slate-700 text-xs font-semibold focus:outline-none"
             >
               <option value="date_desc">Tanggal (Terbaru)</option>
               <option value="date_asc">Tanggal (Terlama)</option>
-              <option value="hours_desc">Total Jam Kerja (Tertinggi)</option>
+              <option value="late_desc">Terlambat Tertinggi</option>
+              <option value="overtime_desc">Lembur Tertinggi</option>
+              <option value="hours_desc">Total Jam Terbanyak</option>
               <option value="name_asc">Nama Karyawan (A-Z)</option>
             </select>
           </div>
@@ -325,21 +336,21 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
       </div>
 
       {/* MONITORING TABLE */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white/95 rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden card-hover">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-[#E9EEF5] text-slate-800 border-b border-slate-300 uppercase font-bold text-[11px] tracking-wider">
-                <th className="py-3.5 px-3.5">Tanggal</th>
-                <th className="py-3 px-3.5">Karyawan</th>
-                <th className="py-3 px-3.5">Jam Masuk</th>
-                <th className="py-3 px-3.5">Jam Keluar</th>
-                <th className="py-3 px-3.5">Total Jam</th>
-                <th className="py-3 px-3.5">Keterlambatan</th>
-                <th className="py-3 px-3.5">Lembur</th>
-                <th className="py-3 px-3.5">Status</th>
-                <th className="py-3 px-3.5">Ringkasan Pekerjaan</th>
-                <th className="py-3 px-3.5 text-center no-print">Aksi</th>
+              <tr className="bg-[#E9EEF5] text-slate-800 border-b border-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4 whitespace-nowrap">Tanggal</th>
+                <th className="py-3 px-4 whitespace-nowrap">Karyawan</th>
+                <th className="py-3 px-4 whitespace-nowrap">Jam Masuk</th>
+                <th className="py-3 px-4 whitespace-nowrap">Jam Keluar</th>
+                <th className="py-3 px-4 whitespace-nowrap">Total Jam</th>
+                <th className="py-3 px-4 whitespace-nowrap">Keterlambatan</th>
+                <th className="py-3 px-4 whitespace-nowrap">Lembur</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 min-w-[200px]">Ringkasan Pekerjaan</th>
+                <th className="py-3 px-4 text-center no-print whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -350,78 +361,94 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
                   </td>
                 </tr>
               ) : (
-                filteredTimesheets.map((ts) => (
-                  <tr key={ts.id} className="hover:bg-blue-50/40 transition">
-                    <td className="py-3 px-3.5 whitespace-nowrap font-medium text-slate-900">
-                      {ts.date}
-                    </td>
-                    <td className="py-3 px-3.5 whitespace-nowrap">
-                      <div className="font-semibold text-slate-900">{ts.employeeName}</div>
-                      <div className="text-[10px] text-slate-500">{ts.position}</div>
-                    </td>
-                    <td className="py-3 px-3.5 whitespace-nowrap font-mono text-slate-700">
-                      {ts.checkIn}
-                    </td>
-                    <td className="py-3 px-3.5 whitespace-nowrap font-mono text-slate-700">
-                      {ts.checkOut}
-                    </td>
-                    <td className="py-3 px-3.5 whitespace-nowrap font-bold text-[#1B365D]">
-                      {ts.workHoursFormatted || `${ts.totalHours} jam`}
-                    </td>
-                    <td className="py-3 px-3.5 whitespace-nowrap">
-                      {ts.lateMinutes > 0 ? (
-                        <span className="font-bold text-red-600">
-                          {ts.lateMinutes} menit
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-3.5 whitespace-nowrap">
-                      {ts.overtimeHours > 0 ? (
-                        <span className="font-bold text-emerald-700">
-                          +{ts.overtimeHours} jam
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">-</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-3.5 whitespace-nowrap">
-                      {ts.lateMinutes > 0 && ts.overtimeHours > 0 ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
-                          Telat & Lembur
-                        </span>
-                      ) : ts.lateMinutes > 0 ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700">
-                          Terlambat
-                        </span>
-                      ) : ts.overtimeHours > 0 ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">
-                          Lembur
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-700">
-                          Tepat Waktu
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-3 px-3.5 max-w-xs text-slate-600">
-                      <p className="truncate text-[11px]" title={ts.description}>
-                        {ts.description}
-                      </p>
-                    </td>
-                    <td className="py-3 px-3.5 text-center whitespace-nowrap no-print">
-                      <button
-                        onClick={() => setActiveDetailItem(ts)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer"
-                        title="Lihat rincian pekerjaan"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        Detail
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                filteredTimesheets.map((ts) => {
+                  const initials = ts.employeeName
+                    ? ts.employeeName.split(' ').map(n => n[0]).slice(0, 2).join('')
+                    : 'EMP';
+                  return (
+                    <tr key={ts.id} className="hover:bg-blue-50/40 transition">
+                      <td className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-900">
+                        {ts.date}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-[#1B365D] font-bold flex items-center justify-center text-xs shadow-xs shrink-0 border border-blue-200/60">
+                            {initials}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-900 leading-tight">{ts.employeeName}</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">{ts.position}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-700 font-medium">
+                        {ts.checkIn}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap font-mono text-slate-700 font-medium">
+                        {ts.checkOut}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap font-bold text-[#1B365D]">
+                        {ts.workHoursFormatted || `${ts.totalHours} jam`}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {ts.lateMinutes > 0 ? (
+                          <span className="font-bold text-red-600">
+                            {ts.lateMinutes} menit
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">-</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {ts.overtimeHours > 0 ? (
+                          <span className="font-bold text-emerald-700">
+                            +{ts.overtimeHours} jam
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">-</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        {ts.lateMinutes > 0 && ts.overtimeHours > 0 ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200/70">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            Telat & Lembur
+                          </span>
+                        ) : ts.lateMinutes > 0 ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200/70">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                            Terlambat
+                          </span>
+                        ) : ts.overtimeHours > 0 ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200/70">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            Lembur
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Tepat Waktu
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 max-w-xs text-slate-600">
+                        <p className="truncate text-[11px]" title={ts.description}>
+                          {ts.description}
+                        </p>
+                      </td>
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap no-print">
+                        <button
+                          onClick={() => setActiveDetailItem(ts)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-xs font-semibold cursor-pointer transition border border-transparent hover:border-blue-200"
+                          title="Lihat rincian pekerjaan"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Detail
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -431,50 +458,53 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
       {/* DETAIL MODAL */}
       {activeDetailItem && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">
-                Rincian Timesheet Harian
-              </h3>
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Rincian Timesheet Karyawan
+                </h3>
+                <span className="text-[11px] text-slate-400">Verifikasi pencatatan harian & rincian pekerjaan</span>
+              </div>
               <button
                 onClick={() => setActiveDetailItem(null)}
-                className="text-slate-400 hover:text-slate-700"
+                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="my-4 space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div className="my-5 space-y-3.5 text-xs">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80">
                 <div>
-                  <span className="text-slate-500 block">Karyawan:</span>
-                  <span className="font-bold text-slate-800">{activeDetailItem.employeeName}</span>
+                  <span className="text-slate-400 font-medium block text-[11px]">Karyawan:</span>
+                  <span className="font-bold text-slate-900 text-sm block">{activeDetailItem.employeeName}</span>
                   <span className="text-[11px] text-slate-500 block">{activeDetailItem.position}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Tanggal:</span>
-                  <span className="font-bold text-slate-800">{activeDetailItem.date}</span>
+                  <span className="text-slate-400 font-medium block text-[11px]">Tanggal:</span>
+                  <span className="font-bold text-slate-900 text-sm block">{activeDetailItem.date}</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div className="grid grid-cols-3 gap-2 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80">
                 <div>
-                  <span className="text-slate-500 block">Jam Masuk:</span>
-                  <span className="font-bold text-slate-800">{activeDetailItem.checkIn}</span>
+                  <span className="text-slate-400 font-medium block text-[11px]">Jam Masuk:</span>
+                  <span className="font-mono font-bold text-slate-800 text-sm block">{activeDetailItem.checkIn}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Jam Keluar:</span>
-                  <span className="font-bold text-slate-800">{activeDetailItem.checkOut}</span>
+                  <span className="text-slate-400 font-medium block text-[11px]">Jam Keluar:</span>
+                  <span className="font-mono font-bold text-slate-800 text-sm block">{activeDetailItem.checkOut}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block">Total Jam:</span>
-                  <span className="font-bold text-[#1B365D]">{activeDetailItem.workHoursFormatted || `${activeDetailItem.totalHours} jam`}</span>
+                  <span className="text-slate-400 font-medium block text-[11px]">Total Jam:</span>
+                  <span className="font-bold text-[#1B365D] text-sm block">{activeDetailItem.workHoursFormatted || `${activeDetailItem.totalHours} jam`}</span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg border border-slate-200 bg-white">
-                <span className="text-slate-500 block mb-1 font-semibold">Deskripsi Aktivitas Pekerjaan:</span>
-                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap">
+              <div className="p-4 rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+                <span className="text-slate-500 block mb-1.5 font-bold text-[11px] uppercase tracking-wider">Deskripsi Aktivitas Pekerjaan:</span>
+                <p className="text-slate-800 leading-relaxed whitespace-pre-wrap text-xs">
                   {activeDetailItem.description}
                 </p>
               </div>
@@ -483,9 +513,9 @@ export function AdminDashboardView({ timesheets, employees, settings }) {
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setActiveDetailItem(null)}
-                className="px-4 py-2 text-xs font-semibold text-white bg-[#1B365D] hover:bg-[#142642] rounded-lg"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-[#1B365D] hover:bg-[#142642] rounded-xl transition cursor-pointer shadow-sm hover:shadow"
               >
-                Tutup
+                Tutup Rincian
               </button>
             </div>
           </div>

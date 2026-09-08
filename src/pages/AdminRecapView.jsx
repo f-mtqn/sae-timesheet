@@ -135,7 +135,7 @@ export function AdminRecapView({ timesheets, employees }) {
       {/* Title Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-[#1B365D] tracking-tight flex items-center gap-2">
             <FileSpreadsheet className="w-6 h-6 text-[#1B365D]" />
             Rekap Jam Kerja Karyawan
           </h2>
@@ -145,10 +145,10 @@ export function AdminRecapView({ timesheets, employees }) {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-wrap items-center gap-2 no-print">
+        <div className="flex flex-wrap items-center gap-2.5 no-print">
           <button
             onClick={() => setShowEmailModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-semibold text-xs shadow-xs transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-xs shadow-sm hover:shadow transition cursor-pointer"
             title="Kirim laporan rekap ke email karyawan"
           >
             <Mail className="w-4 h-4" />
@@ -156,7 +156,7 @@ export function AdminRecapView({ timesheets, employees }) {
           </button>
           <button
             onClick={handleExportRecapCSV}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-xs transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs shadow-sm hover:shadow transition cursor-pointer"
             title="Download laporan rekap Excel (.csv)"
           >
             <FileSpreadsheet className="w-4 h-4" />
@@ -164,7 +164,7 @@ export function AdminRecapView({ timesheets, employees }) {
           </button>
           <button
             onClick={triggerPrint}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#1B365D] hover:bg-[#142642] text-white font-semibold text-xs shadow-xs transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#1B365D] hover:bg-[#142642] text-white font-semibold text-xs shadow-sm hover:shadow transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             Cetak Laporan PDF
@@ -173,13 +173,13 @@ export function AdminRecapView({ timesheets, employees }) {
       </div>
 
       {/* PERIOD SELECTOR CARD */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
+      <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm flex flex-wrap items-center justify-between gap-4 no-print card-hover">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold uppercase text-slate-600">Mode Rekap:</span>
-          <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-100">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Mode Rekapitulasi:</span>
+          <div className="inline-flex rounded-xl border border-slate-200 p-1 bg-slate-100/90">
             <button
               onClick={() => setPeriodType('monthly')}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 periodType === 'monthly' ? 'bg-white text-[#1B365D] shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -187,7 +187,7 @@ export function AdminRecapView({ timesheets, employees }) {
             </button>
             <button
               onClick={() => setPeriodType('yearly')}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
                 periodType === 'yearly' ? 'bg-white text-[#1B365D] shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -196,13 +196,13 @@ export function AdminRecapView({ timesheets, employees }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {periodType === 'monthly' && (
             <div>
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="py-1.5 px-3 border border-slate-300 rounded-lg text-xs font-medium bg-white text-slate-700"
+                className="py-2 px-3.5 border border-slate-200 rounded-xl text-xs font-semibold bg-slate-50/60 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
               >
                 <option value="09">September</option>
                 <option value="08">Agustus</option>
@@ -220,7 +220,7 @@ export function AdminRecapView({ timesheets, employees }) {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="py-1.5 px-3 border border-slate-300 rounded-lg text-xs font-medium bg-white text-slate-700"
+              className="py-2 px-3.5 border border-slate-200 rounded-xl text-xs font-semibold bg-slate-50/60 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
             >
               <option value="2026">2026</option>
               <option value="2025">2025</option>
@@ -231,25 +231,64 @@ export function AdminRecapView({ timesheets, employees }) {
 
       {/* SUMMARY STATS AGGREGATE */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold uppercase text-slate-500">Total Man-Days</span>
-          <div className="text-xl font-bold text-slate-900 mt-1">{grandTotal.totalDays} Hari</div>
-          <span className="text-[11px] text-slate-400">Total kehadiran tercatat</span>
+        {/* Card 1: Total Man-Days */}
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Total Man-Days</span>
+            <div className="p-2.5 rounded-2xl bg-blue-50 text-blue-600">
+              <Users className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2">
+            {grandTotal.totalDays} <span className="text-xs font-normal text-slate-400">hari kerja</span>
+          </div>
+          <span className="text-[11px] text-slate-400 mt-1 block truncate">Total kehadiran staf tercatat</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold uppercase text-slate-500">Total Jam Terakumulasi</span>
-          <div className="text-xl font-bold text-[#1B365D] mt-1">{grandTotal.totalHours} Jam</div>
-          <span className="text-[11px] text-slate-400">Jam kerja seluruh divisi</span>
+
+        {/* Card 2: Total Jam Terakumulasi */}
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Total Jam Terakumulasi</span>
+            <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#1B365D] mt-2">
+            {grandTotal.totalHours} <span className="text-xs font-normal text-slate-400">jam</span>
+          </div>
+          <span className="text-[11px] text-indigo-600 font-medium mt-1 block truncate">Jam kerja seluruh divisi</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold uppercase text-slate-500">Total Keterlambatan</span>
-          <div className="text-xl font-bold text-red-600 mt-1">{grandTotal.totalLateMinutes} Menit</div>
-          <span className="text-[11px] text-red-500">Selisih waktu masuk</span>
+
+        {/* Card 3: Total Keterlambatan */}
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-red-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Total Keterlambatan</span>
+            <div className="p-2.5 rounded-2xl bg-red-50 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-red-600 mt-2">
+            {grandTotal.totalLateMinutes} <span className="text-xs font-normal text-slate-400">menit</span>
+          </div>
+          <span className="text-[11px] text-red-500 font-medium mt-1 block truncate">Selisih waktu masuk</span>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <span className="text-xs font-semibold uppercase text-slate-500">Total Jam Lembur</span>
-          <div className="text-xl font-bold text-emerald-700 mt-1">+{grandTotal.totalOvertimeHours} Jam</div>
-          <span className="text-[11px] text-emerald-600">Terhitung kompensasi</span>
+
+        {/* Card 4: Total Jam Lembur */}
+        <div className="bg-white/95 p-5 rounded-3xl border border-slate-200/90 shadow-sm relative overflow-hidden card-hover">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">Total Jam Lembur</span>
+            <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-2">
+            +{grandTotal.totalOvertimeHours} <span className="text-xs font-normal text-slate-400">jam</span>
+          </div>
+          <span className="text-[11px] text-emerald-600 font-medium mt-1 block truncate">Terhitung kompensasi payroll</span>
         </div>
       </div>
 
@@ -263,87 +302,102 @@ export function AdminRecapView({ timesheets, employees }) {
       </div>
 
       {/* RECAP TABLE */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white/95 rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden card-hover">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-[#E9EEF5] text-slate-800 border-b border-slate-300 uppercase font-bold text-[11px] tracking-wider">
-                <th className="py-3.5 px-3.5">ID & Karyawan</th>
-                <th className="py-3 px-3.5">Departemen</th>
-                <th className="py-3 px-3.5 text-center">Total Hari</th>
-                <th className="py-3 px-3.5 text-right">Total Jam Kerja</th>
-                <th className="py-3 px-3.5 text-right">Rata-rata/Hari</th>
-                <th className="py-3 px-3.5 text-right">Total Keterlambatan</th>
-                <th className="py-3 px-3.5 text-right">Total Lembur</th>
-                <th className="py-3 px-3.5 text-center">Status Akun</th>
+              <tr className="bg-[#E9EEF5] text-slate-800 border-b border-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4 whitespace-nowrap">ID & Karyawan</th>
+                <th className="py-3 px-4 whitespace-nowrap">Departemen</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Total Hari</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Total Jam Kerja</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Rata-rata/Hari</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Total Keterlambatan</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Total Lembur</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Status Akun</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {recapData.map((item) => (
-                <tr key={item.employeeId} className="hover:bg-slate-50 transition">
-                  <td className="py-3 px-3.5">
-                    <div className="font-semibold text-slate-900">{item.namaLengkap}</div>
-                    <div className="text-[10px] text-slate-500">{item.posisi} • ID: {item.employeeId}</div>
-                  </td>
-                  <td className="py-3 px-3.5 text-slate-700 font-medium">
-                    {item.departemen}
-                  </td>
-                  <td className="py-3 px-3.5 text-center font-bold text-slate-900">
-                    {item.totalDays} hari
-                  </td>
-                  <td className="py-3 px-3.5 text-right font-bold text-[#1B365D]">
-                    {item.totalHours} jam
-                  </td>
-                  <td className="py-3 px-3.5 text-right text-slate-600">
-                    {item.averageHoursPerDay} jam/hari
-                  </td>
-                  <td className="py-3 px-3.5 text-right">
-                    {item.totalLateMinutes > 0 ? (
-                      <span className="font-bold text-red-600">
-                        {item.totalLateMinutes} mnt
+              {recapData.map((item) => {
+                const initials = item.namaLengkap
+                  ? item.namaLengkap.split(' ').map(n => n[0]).slice(0, 2).join('')
+                  : 'EMP';
+                return (
+                  <tr key={item.employeeId} className="hover:bg-blue-50/40 transition">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 text-[#1B365D] font-bold flex items-center justify-center text-xs shadow-xs shrink-0 border border-blue-200/60">
+                          {initials}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-slate-900 leading-tight">{item.namaLengkap}</div>
+                          <div className="text-[10px] text-slate-500 mt-0.5">{item.posisi} • <span className="font-mono">{item.employeeId}</span></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-700 font-medium whitespace-nowrap">
+                      {item.departemen}
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-bold text-slate-900 whitespace-nowrap">
+                      {item.totalDays} hari
+                    </td>
+                    <td className="py-3.5 px-4 text-right font-bold text-[#1B365D] whitespace-nowrap">
+                      {item.totalHours} jam
+                    </td>
+                    <td className="py-3.5 px-4 text-right text-slate-600 whitespace-nowrap">
+                      {item.averageHoursPerDay} jam/hari
+                    </td>
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                      {item.totalLateMinutes > 0 ? (
+                        <span className="font-bold text-red-600">
+                          {item.totalLateMinutes} mnt
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">0 mnt</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                      {item.totalOvertimeHours > 0 ? (
+                        <span className="font-bold text-emerald-700">
+                          +{item.totalOvertimeHours} jam
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">0 jam</span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                        item.status === 'aktif' 
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/70' 
+                          : 'bg-slate-100 text-slate-600 border border-slate-200'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'aktif' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                        {item.status.toUpperCase()}
                       </span>
-                    ) : (
-                      <span className="text-slate-400">0 mnt</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-3.5 text-right">
-                    {item.totalOvertimeHours > 0 ? (
-                      <span className="font-bold text-emerald-700">
-                        +{item.totalOvertimeHours} jam
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">0 jam</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-3.5 text-center">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
-                      item.status === 'aktif' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
-                    }`}>
-                      {item.status.toUpperCase()}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
             {/* Table Footer Grand Total */}
             <tfoot>
-              <tr className="bg-slate-100/80 font-bold border-t-2 border-slate-300 text-slate-900">
-                <td colSpan={2} className="py-3.5 px-3.5 uppercase tracking-wider text-xs">
+              <tr className="bg-slate-100/90 font-bold border-t-2 border-slate-300 text-slate-900">
+                <td colSpan={2} className="py-4 px-4 text-xs">
                   Grand Total Keseluruhan
                 </td>
-                <td className="py-3.5 px-3.5 text-center text-xs">
+                <td className="py-4 px-4 text-center text-xs whitespace-nowrap">
                   {grandTotal.totalDays} hari
                 </td>
-                <td className="py-3.5 px-3.5 text-right text-xs text-[#1B365D]">
+                <td className="py-4 px-4 text-right text-xs text-[#1B365D] whitespace-nowrap">
                   {grandTotal.totalHours} jam
                 </td>
-                <td className="py-3.5 px-3.5 text-right text-xs text-slate-500">
+                <td className="py-4 px-4 text-right text-xs text-slate-500 whitespace-nowrap">
                   -
                 </td>
-                <td className="py-3.5 px-3.5 text-right text-xs text-red-600">
+                <td className="py-4 px-4 text-right text-xs text-red-600 whitespace-nowrap">
                   {grandTotal.totalLateMinutes} mnt
                 </td>
-                <td className="py-3.5 px-3.5 text-right text-xs text-emerald-700">
+                <td className="py-4 px-4 text-right text-xs text-emerald-700 whitespace-nowrap">
                   +{grandTotal.totalOvertimeHours} jam
                 </td>
                 <td></td>
@@ -356,13 +410,16 @@ export function AdminRecapView({ timesheets, employees }) {
       {/* EMAIL RECAP MODAL (PRD 6.8 SIMULATION) */}
       {showEmailModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2 text-[#1B365D]">
-                <Mail className="w-5 h-5" />
+                <Mail className="w-5 h-5 text-blue-600" />
                 <h3 className="text-base font-bold">Kirim Rekap via Email</h3>
               </div>
-              <button onClick={() => setShowEmailModal(false)} className="text-slate-400 hover:text-slate-700">
+              <button 
+                onClick={() => setShowEmailModal(false)} 
+                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -376,37 +433,37 @@ export function AdminRecapView({ timesheets, employees }) {
                 </p>
               </div>
             ) : (
-              <div className="my-4 space-y-3 text-xs">
+              <div className="my-4 space-y-3.5 text-xs">
                 <p className="text-slate-600 leading-relaxed">
                   Fitur ini akan mengirimkan salinan rekapitulasi jam kerja individu secara otomatis ke masing-masing email karyawan aktif.
                 </p>
 
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1.5">
+                <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Target Penerima:</span>
+                    <span className="text-slate-500 font-medium">Target Penerima:</span>
                     <span className="font-bold text-slate-800">{employees.length} Karyawan Aktif</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Periode Rekap:</span>
+                    <span className="text-slate-500 font-medium">Periode Rekap:</span>
                     <span className="font-bold text-[#1B365D]">{periodType === 'monthly' ? `Bulan ${selectedMonth}/` : ''}{selectedYear}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Format Lampiran:</span>
+                    <span className="text-slate-500 font-medium">Format Lampiran:</span>
                     <span className="font-bold text-slate-800">PDF Rincian Pribadi</span>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3">
+                <div className="flex justify-end gap-2.5 pt-2">
                   <button
                     onClick={() => setShowEmailModal(false)}
-                    className="px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
                     disabled={emailStatus === 'sending'}
                     onClick={handleSendEmailRecap}
-                    className="px-4 py-2 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-lg shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-5 py-2 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     <Mail className="w-3.5 h-3.5" />
                     {emailStatus === 'sending' ? 'Mengirim...' : 'Kirim Sekarang'}

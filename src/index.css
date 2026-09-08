@@ -2,27 +2,84 @@
 
 :root {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.004em;
   --brand-navy: #1B365D;
   --brand-blue: #234B82;
   --brand-light-blue: #0284C7;
   --brand-red: #D9232D;
+  --app-bg: #eef2f6;
+  --ink: #3f4e61;
 }
 
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+html {
+  scroll-behavior: smooth;
 }
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
+
+body {
+  background-color: var(--app-bg);
+  background-image:
+    radial-gradient(900px 420px at 88% -8%, rgba(125, 176, 224, 0.18), transparent 58%),
+    radial-gradient(720px 380px at -6% 12%, rgba(27, 54, 93, 0.05), transparent 52%);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+
+button,
+a,
+input,
+select,
+textarea {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(35, 75, 130, 0.12);
+}
+
+::selection {
+  background: rgba(35, 75, 130, 0.16);
+  color: #1b365d;
+}
+
+/* Engineering Blueprint & Modern UI Utilities */
+.engineering-grid {
+  background-image: radial-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.engineering-grid-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.glass-card-dark {
+  background: rgba(15, 28, 48, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
 }
 
 @media print {
