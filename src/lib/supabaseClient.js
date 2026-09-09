@@ -19,6 +19,7 @@ export function mapEmployeeFromDB(row) {
     namaLengkap: row.nama_lengkap,
     email: row.email,
     posisi: row.posisi,
+    divisi: row.divisi || '',
     departemen: row.departemen,
     noTelepon: row.no_telepon || '',
     role: row.role || 'user',
@@ -33,6 +34,7 @@ export function mapEmployeeToDB(emp) {
     nama_lengkap: emp.namaLengkap,
     email: emp.email,
     posisi: emp.posisi,
+    divisi: emp.divisi || '',
     departemen: emp.departemen,
     no_telepon: emp.noTelepon || null,
     role: emp.role || 'user',
@@ -160,7 +162,7 @@ export async function logoutFromSupabase() {
   if (error) console.error('Error logging out:', error);
 }
 
-export async function registerWithSupabase({ email, password, namaLengkap, noTelepon, posisi, departemen }) {
+export async function registerWithSupabase({ email, password, namaLengkap, noTelepon, posisi, divisi, departemen }) {
   const cleanEmail = email.trim().toLowerCase();
 
   // 1. Generate next employee code
@@ -180,16 +182,18 @@ export async function registerWithSupabase({ email, password, namaLengkap, noTel
   }
   const nextCode = `EMP-${String(nextNum).padStart(3, '0')}`;
 
-  // 2. Sign up with Supabase Auth
+  // 2. Sign up with Supabase Auth (confirmation link will be sent to email)
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
     email: cleanEmail,
     password: password,
     options: {
+      emailRedirectTo: window.location.origin,
       data: {
         nama_lengkap: namaLengkap,
         no_telepon: noTelepon,
         posisi: posisi || 'Staff Engineering',
-        departemen: departemen || 'Engineering',
+        divisi: divisi || '',
+        departemen: departemen || '',
       },
     },
   });
@@ -200,14 +204,15 @@ export async function registerWithSupabase({ email, password, namaLengkap, noTel
 
   const authUserId = authData?.user?.id;
 
-  // 3. Upsert into public.employees
+  // 3. Insert into public.employees immediately (user not confirmed yet, but profile is ready)
   const newEmpPayload = {
     auth_user_id: authUserId,
     employee_code: nextCode,
     nama_lengkap: namaLengkap.trim(),
     email: cleanEmail,
     posisi: posisi?.trim() || 'Staff Engineering',
-    departemen: departemen?.trim() || 'Engineering',
+    divisi: divisi?.trim() || '',
+    departemen: departemen?.trim() || '',
     no_telepon: noTelepon?.trim() || '-',
     role: 'user',
     status: 'aktif',
@@ -216,7 +221,7 @@ export async function registerWithSupabase({ email, password, namaLengkap, noTel
     updated_at: new Date().toISOString(),
   };
 
-  const { data: createdEmp, error: insertError } = await supabase
+  const { error: insertError } = await supabase
     .from('employees')
     .upsert(newEmpPayload, { onConflict: 'email' })
     .select()
@@ -224,11 +229,77 @@ export async function registerWithSupabase({ email, password, namaLengkap, noTel
 
   if (insertError) {
     console.error('Error inserting employee profile:', insertError);
+    // Don't throw here — auth user is created, employee profile might be inserted later
   }
 
-  // 4. Perform direct sign-in so session is ready immediately
-  return await loginWithSupabase(cleanEmail, password);
+  // 4. Return the email so the caller knows where OTP was sent
+  return { email: cleanEmail, needsOtp: true };
 }
+
+/**
+ * Verify OTP code from email and complete login
+ * Called after user submits the 6-digit code from their email
+ */
+export async function verifyOtpAndLogin(email, token) {
+  const cleanEmail = email.trim().toLowerCase();
+
+  let { data, error } = await supabase.auth.verifyOtp({
+    email: cleanEmail,
+    token: token.trim(),
+    type: 'signup',
+  });
+
+  if (error && (error.message?.includes('type') || error.message?.includes('Token'))) {
+    const fallback = await supabase.auth.verifyOtp({
+      email: cleanEmail,
+      token: token.trim(),
+      type: 'email',
+    });
+    if (!fallback.error) {
+      data = fallback.data;
+      error = null;
+    }
+  }
+
+  if (error) {
+    throw error;
+  }
+
+  // After OTP verification, fetch employee profile
+  const { data: emp, error: empErr } = await supabase
+    .from('employees')
+    .select('*')
+    .eq('email', cleanEmail)
+    .maybeSingle();
+
+  if (empErr) {
+    console.error('Error fetching employee profile after OTP:', empErr);
+  }
+
+  if (emp) {
+    if (emp.status === 'nonaktif') {
+      await supabase.auth.signOut();
+      throw new Error('Akun ini telah dinonaktifkan oleh administrator.');
+    }
+    return mapEmployeeFromDB(emp);
+  }
+
+  // Fallback if employee profile not found
+  return {
+    id: data.user.id,
+    authUserId: data.user.id,
+    employeeCode: 'EMP-NEW',
+    namaLengkap: data.user.user_metadata?.nama_lengkap || cleanEmail.split('@')[0],
+    email: cleanEmail,
+    posisi: 'Staff Engineering',
+    divisi: data.user.user_metadata?.divisi || '',
+    departemen: data.user.user_metadata?.departemen || '',
+    role: 'user',
+    status: 'aktif',
+    tanggalBergabung: new Date().toISOString().split('T')[0],
+  };
+}
+
 
 // ==========================================
 // 3. DATA API HELPERS

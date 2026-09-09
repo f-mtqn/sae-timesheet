@@ -23,10 +23,13 @@ import {
   Award,
   FileCheck2,
   ArrowUpRight,
-  Loader2
+  Loader2,
+  MailCheck,
+  ChevronDown,
 } from 'lucide-react';
 import { AccessibilityWidget } from '../components/AccessibilityWidget';
-import { loginWithSupabase, registerWithSupabase } from '../lib/supabaseClient';
+import { loginWithSupabase, registerWithSupabase, verifyOtpAndLogin } from '../lib/supabaseClient';
+import { getDivisiList, getDepartemenList, getSubDepartemenList, hasSubDepartemen } from '../data/orgStructure';
 
 export function LandingLoginPage({ onLogin, employees }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'register'
@@ -41,18 +44,47 @@ export function LandingLoginPage({ onLogin, employees }) {
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPhone, setRegPhone] = useState('');
-  const [regPosition, setRegPosition] = useState('Staff Engineering');
-  const [regDepartment, setRegDepartment] = useState('Engineering');
+  const [regPosition, setRegPosition] = useState('');
+  const [regDivisi, setRegDivisi] = useState('');
+  const [regDepartemen, setRegDepartemen] = useState('');
+  const [regSubDepartemen, setRegSubDepartemen] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState('');
   const [regSuccessMessage, setRegSuccessMessage] = useState('');
 
+  // OTP verification state
+  const [otpStep, setOtpStep] = useState(false); // true = show OTP input screen
+  const [otpEmail, setOtpEmail] = useState('');   // email yang menunggu verifikasi
+  const [otpCode, setOtpCode] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+
   // Forgot password modal
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
+
+  // Cascading dropdown derived data
+  const divisiList = getDivisiList();
+  const departemenList = regDivisi ? getDepartemenList(regDivisi) : [];
+  const subDepartemenList = (regDivisi && regDepartemen) ? getSubDepartemenList(regDivisi, regDepartemen) : [];
+  const needsSubDepartemen = subDepartemenList.length > 0;
+
+  // Final departemen value: use sub-departemen if available, else main departemen
+  const finalDepartemen = needsSubDepartemen ? regSubDepartemen : regDepartemen;
+
+  const handleDivisiChange = (val) => {
+    setRegDivisi(val);
+    setRegDepartemen('');
+    setRegSubDepartemen('');
+  };
+
+  const handleDepartemenChange = (val) => {
+    setRegDepartemen(val);
+    setRegSubDepartemen('');
+  };
 
   // Real Supabase Login
   const handleStandardLogin = async (e) => {
@@ -100,21 +132,39 @@ export function LandingLoginPage({ onLogin, employees }) {
       return;
     }
 
+    if (!regDivisi) {
+      setRegError('Silakan pilih Divisi terlebih dahulu.');
+      return;
+    }
+
+    if (!regDepartemen) {
+      setRegError('Silakan pilih Departemen.');
+      return;
+    }
+
+    if (needsSubDepartemen && !regSubDepartemen) {
+      setRegError('Silakan pilih Sub-Departemen.');
+      return;
+    }
+
     setRegLoading(true);
     try {
-      const user = await registerWithSupabase({
+      const result = await registerWithSupabase({
         email: regEmail,
         password: regPassword,
         namaLengkap: regName,
         noTelepon: regPhone,
         posisi: regPosition || 'Staff Engineering',
-        departemen: regDepartment,
+        divisi: regDivisi,
+        departemen: finalDepartemen,
       });
 
-      setRegSuccessMessage('Pendaftaran berhasil! Mengarahkan ke sistem timesheet...');
-      setTimeout(() => {
-        onLogin(user);
-      }, 800);
+      if (result.needsOtp) {
+        // Show OTP input screen
+        setOtpEmail(result.email);
+        setOtpStep(true);
+        setRegSuccessMessage('');
+      }
     } catch (err) {
       console.error('Registration error:', err);
       if (err.message?.includes('already registered') || err.message?.includes('duplicate key') || err.message?.includes('User already registered')) {
@@ -124,6 +174,33 @@ export function LandingLoginPage({ onLogin, employees }) {
       }
     } finally {
       setRegLoading(false);
+    }
+  };
+
+  const handleOtpVerify = async (e) => {
+    e.preventDefault();
+    setOtpError('');
+
+    if (!otpCode.trim() || otpCode.trim().length < 6) {
+      setOtpError('Masukkan kode OTP (6 - 8 digit) yang dikirim ke email Anda.');
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const user = await verifyOtpAndLogin(otpEmail, otpCode);
+      onLogin(user);
+    } catch (err) {
+      console.error('OTP verification error:', err);
+      if (err.message?.includes('Token has expired') || err.message?.includes('expired')) {
+        setOtpError('Kode OTP sudah kedaluwarsa. Silakan daftar ulang untuk mendapatkan kode baru.');
+      } else if (err.message?.includes('invalid') || err.message?.includes('Invalid')) {
+        setOtpError('Kode OTP tidak valid. Periksa email Anda dan coba kembali.');
+      } else {
+        setOtpError(err.message || 'Verifikasi gagal. Silakan coba kembali.');
+      }
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -348,7 +425,84 @@ export function LandingLoginPage({ onLogin, employees }) {
                     )}
                   </button>
                 </form>
+              ) : otpStep ? (
+                /* ── OTP / EMAIL CONFIRMATION SCREEN ── */
+                <div className="space-y-4 py-1">
+                  <div className="text-center space-y-2">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-sky-50 border border-sky-200 mx-auto">
+                      <MailCheck className="w-7 h-7 text-sky-600" />
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-800">Verifikasi Email Anda</h3>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Kode atau tautan konfirmasi dikirim ke:<br />
+                      <strong className="text-slate-700">{otpEmail}</strong>
+                    </p>
+                  </div>
+
+                  {otpError && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                      <span>{otpError}</span>
+                    </div>
+                  )}
+
+                  {/* Input Kode OTP (6 - 8 Digit) */}
+                  <form onSubmit={handleOtpVerify} className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5 text-center">
+                        Masukkan Kode OTP dari Email:
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={8}
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                        placeholder="••••••••"
+                        className="w-full px-4 py-2.5 text-center text-xl font-bold tracking-[0.3em] border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={otpLoading || otpCode.length < 6}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#1B365D] hover:bg-[#16304f] disabled:opacity-50 text-white font-bold text-xs sm:text-sm cursor-pointer flex items-center justify-center gap-2 shadow-sm hover:shadow transition"
+                    >
+                      {otpLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Memverifikasi Kode...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Verifikasi Kode OTP</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+
+                  <div className="relative flex py-1 items-center">
+                    <div className="flex-grow border-t border-slate-200"></div>
+                    <span className="flex-shrink mx-2 text-[11px] text-slate-400">atau</span>
+                    <div className="flex-grow border-t border-slate-200"></div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 text-center leading-relaxed">
+                    Anda juga bisa langsung mengklik tombol <strong>"Confirm Your Email"</strong> di dalam email untuk masuk otomatis.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => { setOtpStep(false); setOtpCode(''); setOtpError(''); setRegError(''); }}
+                    className="w-full text-center text-xs text-slate-400 hover:text-slate-600 transition pt-1"
+                  >
+                    ← Kembali ke form pendaftaran
+                  </button>
+                </div>
+
               ) : (
+                /* ── REGISTER FORM ── */
                 <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
                   {regError && (
                     <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-center gap-2">
@@ -357,16 +511,10 @@ export function LandingLoginPage({ onLogin, employees }) {
                     </div>
                   )}
 
-                  {regSuccessMessage && (
-                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
-                      <span>{regSuccessMessage}</span>
-                    </div>
-                  )}
-
+                  {/* Nama Lengkap */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Nama Lengkap & Gelar
+                      Nama Lengkap &amp; Gelar
                     </label>
                     <input
                       type="text"
@@ -378,6 +526,7 @@ export function LandingLoginPage({ onLogin, employees }) {
                     />
                   </div>
 
+                  {/* Email */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Email Akun
@@ -387,41 +536,84 @@ export function LandingLoginPage({ onLogin, employees }) {
                       required
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
-                      placeholder="nama.anda@gmail.com / perusahaaan"
+                      placeholder="nama.anda@gmail.com / perusahaan"
                       className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Posisi / Jabatan
-                      </label>
-                      <input
-                        type="text"
-                        value={regPosition}
-                        onChange={(e) => setRegPosition(e.target.value)}
-                        placeholder="Piping Engineer / Drafter"
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        Departemen
-                      </label>
-                      <select
-                        value={regDepartment}
-                        onChange={(e) => setRegDepartment(e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
-                      >
-                        <option value="Engineering">Engineering</option>
-                        <option value="Operations">Operations</option>
-                        <option value="QA & HSE">QA & HSE</option>
-                        <option value="Project Support">Project Support</option>
-                      </select>
-                    </div>
+                  {/* Posisi */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Posisi / Jabatan
+                    </label>
+                    <input
+                      type="text"
+                      value={regPosition}
+                      onChange={(e) => setRegPosition(e.target.value)}
+                      placeholder="Piping Engineer / Project Control / Drafter"
+                      className="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1B365D] bg-slate-50/50"
+                    />
                   </div>
 
+                  {/* Divisi Dropdown */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Divisi <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      required
+                      value={regDivisi}
+                      onChange={(e) => handleDivisiChange(e.target.value)}
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
+                    >
+                      <option value="">— Pilih Divisi —</option>
+                      {divisiList.map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Departemen Dropdown (muncul setelah pilih divisi) */}
+                  {regDivisi && (
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Departemen <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        required
+                        value={regDepartemen}
+                        onChange={(e) => handleDepartemenChange(e.target.value)}
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
+                      >
+                        <option value="">— Pilih Departemen —</option>
+                        {departemenList.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Sub-Departemen (hanya muncul jika ada sub-dept) */}
+                  {needsSubDepartemen && (
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Sub-Departemen <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        required
+                        value={regSubDepartemen}
+                        onChange={(e) => setRegSubDepartemen(e.target.value)}
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1B365D]"
+                      >
+                        <option value="">— Pilih Sub-Departemen —</option>
+                        {subDepartemenList.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* No. Telepon */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       No. Telepon / WhatsApp
@@ -435,6 +627,7 @@ export function LandingLoginPage({ onLogin, employees }) {
                     />
                   </div>
 
+                  {/* Kata Sandi */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -465,7 +658,7 @@ export function LandingLoginPage({ onLogin, employees }) {
                   </div>
 
                   <p className="text-[11px] text-slate-500">
-                    * Akun baru langsung aktif di Supabase dan dapat digunakan seketika tanpa perlu verifikasi email.
+                    * Kode OTP akan dikirim ke email Anda untuk verifikasi akun.
                   </p>
 
                   <button
@@ -476,12 +669,12 @@ export function LandingLoginPage({ onLogin, employees }) {
                     {regLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Mendaftarkan Akun ke Supabase...</span>
+                        <span>Mendaftarkan Akun...</span>
                       </>
                     ) : (
                       <>
                         <UserPlus className="w-4 h-4" />
-                        <span>Daftar Akun Baru Sekarang</span>
+                        <span>Daftar &amp; Kirim Kode OTP</span>
                       </>
                     )}
                   </button>

@@ -146,10 +146,25 @@ function MainApp() {
       }
     });
 
-    // Listen for auth state changes
+    // Listen for auth state changes (including email confirmation redirect)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setCurrentUser(null);
+      } else if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+        // Triggered when user confirms email via link and is redirected back
+        const userEmail = session.user.email?.toLowerCase();
+        const { data: emp } = await supabase
+          .from('employees')
+          .select('*')
+          .eq('email', userEmail)
+          .maybeSingle();
+
+        if (emp && emp.status !== 'nonaktif') {
+          const mapped = mapEmployeeFromDB(emp);
+          setCurrentUser(mapped);
+          setActiveTab(mapped.role === 'admin' ? 'admin_dashboard' : 'employee_input');
+          loadSupabaseData();
+        }
       }
     });
 
